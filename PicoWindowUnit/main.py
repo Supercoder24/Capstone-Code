@@ -45,6 +45,10 @@ def stat(val):
             return position
         else:
             return position/TILT_STEPS * 100
+    if val == 'm0l':
+        return ThreadStep.limits['m0'][0].value() + ThreadStep.limits['m0'][1].value()
+    if val == 'm1l':
+        return ThreadStep.limits['m1'][0].value() + ThreadStep.limits['m1'][1].value()
     
 def pos(motor, position):
     if position == -2:

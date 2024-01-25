@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+<!--See notes on register.html-->
+<!--Similar to create.html-->
+
+{% block header %}
+  <h1>{% block title %}Edit "{{ post['title'] }}"{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="title">Title</label>
+    <input name="title" id="title"
+      value="{{ request.form['title'] or post['title'] }}" required> <!--Display post['title'] on first load, but request.form['title'] afterwards (in case of error)-->
+    <label for="body">Body</label>
+    <textarea name="body" id="body">{{ request.form['body'] or post['body'] }}</textarea>
+    <input type="submit" value="Save"> <!--Submits form to this page via post-->
+  </form>
+  <hr>
+  <form action="{{ url_for('blog.delete', id=post['id']) }}" method="post"> <!--Submits form to blog.delete action instead-->
+    <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');"> <!--Confirms with javascript before submitting-->
+  </form>
+{% endblock %}

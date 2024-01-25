@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+<!--See notes on base.html-->
+<!--The above means that this replaces blocks from the base template-->
+<!--All content must appear in block tags-->
+{% block header %}
+  <h1>{% block title %}Register{% endblock %}</h1> <!--Nesting blocks means that Register is only written once, but to both places-->
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="username">Username</label>
+    <input name="username" id="username" required> <!--required keyword is for client-side validation, but still always requires server-side validation-->
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+    <input type="submit" value="Register">
+  </form>
+{% endblock %}

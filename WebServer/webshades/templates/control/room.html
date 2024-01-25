@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+<!--See notes on register.html-->
+
+{% block header %}
+  <h1>{% block title %}Room {{room['roomname']}}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <article class="post">
+      <header>
+        <div>
+          <h1>Room {{room['roomname']}}</h1>
+        </div>
+      </header>
+      <p class="body">{{room['id']}} {{room['ip']}} {{room['picos']}} {{room['windows']}} {{room['variables']}}</p>
+      <form method="post">
+        <label for="variables">New Variables</label>
+        <input name="variables" id="variables" value="{{room['variables']}}" required> <!--required keyword is for client-side validation, but still always requires server-side validation-->
+        <input type="submit" value="Register">
+      </form>
+    </article>
+{% endblock %}
