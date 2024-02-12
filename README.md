@@ -10,7 +10,7 @@ Run these commands on a Raspberry Pi 4B+ after installing Raspbian and setting u
 
 ## Run Web Server
 1. Enter <code>backend</code> folder
-2. Run <code>./bin/activate</code>
+2. Run <code>. ./bin/activate</code>
 3. Run <code>python3 backend.py &</code>
 4. Run <code>flask run</code>
 
