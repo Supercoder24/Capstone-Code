@@ -1,0 +1,93 @@
+<!-- 
+Uses Jinja for rendering
+Automatically escapes HTML, so user input is safe to display
+Python-style syntax
+Each template can extend a base template and override specific sections
+"block" means that it will be overriden by another template
+-->
+<!doctype html>
+<title>Room
+  a210 - Web Shades
+</title>
+<!--{{ room['roomname'] }}-->
+<link rel="stylesheet" href="main.css">
+<!--{{ url_for('static', filename='main.css') }}"-->
+<div id="main">
+  <div id="tabs">
+    <div class="open tab">
+      <h1>Room a210</h1>
+      <h2>Manual</h2>
+    </div>
+    <div class="tab">
+      <h1>Room a220</h1>
+      <h2>Automatic</h2>
+    </div>
+    <div class="tab">
+      <h1>Room a230</h1>
+      <h2>Scheduled</h2>
+    </div>
+    <div id="new-room">+</div>
+  </div>
+  <div id="controls">
+    <div id="schedule">
+      <h1>Monday 2/12/2024</h1>
+      <ol>
+        <li>8:15 - Social Engineering</li>
+        <li>9:20 - Social Engineering</li>
+        <li>10:25 - Social Engineering</li>
+        <li>11:30 - Lunch</li>
+        <li>12:55 - APUSH</li>
+        <li>2:00 - Capstone</li>
+        <li>3:00 - After School</li>
+        <li>4:00 - Evening</li>
+        <li>7:00 - Night</li>
+      </ol>
+    </div>
+    <div id="main-controls">
+      <div id="mode-selector">
+        <div class="mode" id="auto">A</div>
+        <div class="mode" id="man">M</div>
+        <div class="mode" id="sched">S</div>
+      </div>
+      <div id="main-value">50%</div>
+      <input id="main-slider" type="range" value="50" min="0" max="100">
+      <button id="reset">Reset</button>
+    </div>
+    <div id="presets"></div>
+  </div>
+  <div id="windows">
+    <div class="window open">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="100">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Drag to Close</div>
+    </div>
+    <div class="window closed">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="0">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Drag to Open</div>
+    </div>
+    <div class="window closed">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="50">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Drag to Open</div>
+    </div>
+    <div class="window closed">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="50">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Drag to Open</div>
+    </div>
+  </div>
+  <div id="master-controls">
+    <button>Tilt Open</button>
+    <button>Close All</button>
+    <button>Raise All</button>
+  </div>
+</div>
