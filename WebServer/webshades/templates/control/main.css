@@ -125,6 +125,11 @@ html {
 
       .mode {
         cursor: pointer;
+
+        &.active {
+          text-shadow: 1px 1px 0 white, -1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white;
+          color: blue;
+        }
       }
     }
 
@@ -142,6 +147,98 @@ html {
       font-size: 18px;
       margin-top: 10px;
       max-width: 110px;
+    }
+  }
+}
+
+#windows {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .window {
+    width: 100px;
+    height: 90%;
+    border: 2px outset white;
+    margin-left: 10px;
+    margin-right: 10px;
+
+    &.override {
+      border: 2px outset yellow;
+    }
+
+    .window-outside {
+      background-color: skyblue;
+      position: relative;
+    }
+
+    .window-inside {
+      background-color: grey;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .window-slider {
+        appearance: slider-vertical;
+        height: 90%;
+        width: 100px;
+
+        &::-webkit-slider-runnable-track {
+          border-radius: 12px;
+          box-shadow: 0 2px 1px 0px navy;
+        }
+      }
+
+
+    }
+
+    &.auto {
+      .window-inside {
+        .window-slider {
+          display: none;
+        }
+
+        background: repeating-linear-gradient(-45deg, skyblue, skyblue 10px, grey 10px, grey 20px)
+      }
+    }
+
+    .window-bar {
+      position: relative;
+      height: 24px;
+      text-align: center;
+      border: 1px solid white;
+      background: black;
+      cursor: pointer;
+    }
+
+    &.open .window-outside {
+      height: calc(100% - 25px);
+      top: 25px;
+    }
+
+    &.open .window-inside {
+      height: 0;
+      top: 0;
+    }
+
+    &.open .window-bar {
+      bottom: calc(100% - 25px);
+    }
+
+    &.closed .window-outside {
+      height: 0;
+      bottom: 0;
+    }
+
+    &.closed .window-inside {
+      height: calc(100% - 25px);
+      top: 0;
+    }
+
+    &.closed .window-bar {
+      bottom: 0;
     }
   }
 }

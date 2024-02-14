@@ -45,7 +45,7 @@ Each template can extend a base template and override specific sections
     </div>
     <div id="main-controls">
       <div id="mode-selector">
-        <div class="mode" id="auto">A</div>
+        <div class="mode active" id="auto">A</div>
         <div class="mode" id="man">M</div>
         <div class="mode" id="sched">S</div>
       </div>
@@ -56,28 +56,28 @@ Each template can extend a base template and override specific sections
     <div id="presets"></div>
   </div>
   <div id="windows">
-    <div class="window open">
+    <div class="window open override">
       <div class="window-inside">
         <input class="window-slider" type="range" min="0" max="100" value="100">
       </div>
       <div class="window-outside"></div>
       <div class="window-bar">Drag to Close</div>
     </div>
-    <div class="window closed">
+    <div class="window closed override">
       <div class="window-inside">
         <input class="window-slider" type="range" min="0" max="100" value="0">
       </div>
       <div class="window-outside"></div>
       <div class="window-bar">Drag to Open</div>
     </div>
-    <div class="window closed">
+    <div class="window closed override">
       <div class="window-inside">
         <input class="window-slider" type="range" min="0" max="100" value="50">
       </div>
       <div class="window-outside"></div>
       <div class="window-bar">Drag to Open</div>
     </div>
-    <div class="window closed">
+    <div class="window closed auto">
       <div class="window-inside">
         <input class="window-slider" type="range" min="0" max="100" value="50">
       </div>
@@ -90,4 +90,5 @@ Each template can extend a base template and override specific sections
     <button>Close All</button>
     <button>Raise All</button>
   </div>
+  <script src="script.js"></script>
 </div>
