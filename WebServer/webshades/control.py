@@ -43,27 +43,30 @@ def room(name):
         if error is not None:
             flash(error)
         else:
-            for _ in new_variables.split(","):
-                if len(_)>=2:
-                    if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= -2)):
-                        req = db.execute(
-                            'SELECT id, ip, windows FROM access '
-                            'INNER JOIN rooms ON rooms.id=access.room_id '
-                            'WHERE user_id=? AND roomname=?', (g.user['id'], name)
-                            ).fetchone()
-                        if req is not None:
-                            if len(new_variables.split(',')) != int(req['windows']):
-                                flash('Not enough variables!')
-                            else:
-                                db.execute(
-                                    'UPDATE rooms '
-                                    'SET variables=? '
-                                    'WHERE id=?', (new_variables,req['id'])
-                                    )
-                                db.commit()
-                                with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
-                                    file.write(new_variables)
-
+            if db.execute('SELECT override INNER JOIN rooms ON rooms.id=access.room_id WHERE override = True AND roomname=?',(name)) is not None:  #MAKE SURE TO CHANGE OVERRIDE WHEN OVERRIDDEN
+                for _ in new_variables.split(","):
+                    if len(_)>=2:
+                        if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= -2)):
+                            req = db.execute(
+                                'SELECT id, ip, windows FROM access '
+                                'INNER JOIN rooms ON rooms.id=access.room_id '
+                                'WHERE user_id=? AND roomname=?', (g.user['id'], name)
+                                ).fetchone()
+                            if req is not None:
+                                if len(new_variables.split(',')) != int(req['windows']):
+                                    flash('Not enough variables!')
+                                else:
+                                    db.execute(
+                                        'UPDATE rooms '
+                                        'SET variables=? '
+                                        'WHERE id=?', (new_variables,req['id'])
+                                        )
+                                    db.commit()
+                                    with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
+                                        file.write(new_variables)
+            else:
+                flash("Sorry, room {} is currently overwritten by the admins. If you think this is incorrect, feel free to send them a message.".format(name))
+                
 
     room = db.execute(
         'SELECT id, roomname, ip, picos, windows, variables FROM access '
@@ -136,6 +139,56 @@ def override():         #Check override = True/False before updating room contro
             )
             db.commit()
         return render_template('control/room.html', room=room)
+        
+@bp.route('/room/<name>/override', methods=('GET','POST'))
+@login_required
+def override_individual(name):
+    db = get_db()
+    if request.method == 'POST':
+        new_variables = request.form['variables']
+        error = None
+
+        if not new_variables:
+           error = 'New variables are required.'
+
+        if error is not None:
+           flash(error)
+        else:
+            req = db.execute(
+                'SELECT user_id, admin FROM access'
+                'WHERE user_id=? AND admin = True', (g.user['id'])
+            ).fetchone()
+            if req is not None:
+                for _ in new_variables.split(","):
+                    if len(_)>=2:
+                        req = db.execute(
+                                'SELECT id, ip, windows FROM access '
+                                'INNER JOIN rooms ON rooms.id=access.room_id '
+                                'WHERE user_id=? AND roomname=?', (g.user['id'], name)
+                                ).fetchone()
+                        if req is not None:
+                            if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= -2)):
+                                if len(new_variables.split(',')) != int(req['windows']):
+                                    flash('Not enough variables!')
+                                else:
+                                    with open(current_app.config['VARIABLES'] + req['ip']+'.txt','w') as fileL
+                                        file.write(new_variables)
+    room = db.execute(
+            'SELECT id, roomname, ip, picos, windows, variables FROM access '
+            'INNER JOIN rooms ON rooms.id=access.room_id '
+            'WHERE user_id=? AND roomname=?', (g.user['id'], name)
+        ).fetchone()
+    if room == None:
+        # Throw error and redirect
+        return redirect(url_for('auth.new'))
+    else:
+        db.execute(
+                'UPDATE access '
+                'SET last_accessed=current_timestamp '
+                'WHERE user_id=? and room_id=?', (g.user['id'], room['id'])
+            )
+        db.commit()
+    return render_template('control/room.html', room=room)
 
 
 #@bp.route('/create', methods=('GET', 'POST')) # Works the same way as /register in auth.py
