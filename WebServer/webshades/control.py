@@ -44,31 +44,25 @@ def room(name):
             flash(error)
         else:
             for _ in new_variables.split(","):
-        req = db.execute(
-        'SELECT user_id, room_id, roomname FROM access '
-        'INNER JOIN rooms ON access.room_id = rooms.id '
-        'WHERE user_id = ? AND roomname=?', (g.user['id'],name)
-    ).fetchone()
-        if req is not None:
-            if len(_)>=2:
-                if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= -2)):
-                    req = db.execute(
-                        'SELECT id, ip, windows FROM access '
-                        'INNER JOIN rooms ON rooms.id=access.room_id '
-                        'WHERE user_id=? AND roomname=?', (g.user['id'], name)
+        if len(_)>=2:
+            if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= -2)):
+                req = db.execute(
+                    'SELECT id, ip, windows FROM access '
+                    'INNER JOIN rooms ON rooms.id=access.room_id '
+                    'WHERE user_id=? AND roomname=?', (g.user['id'], name)
                     ).fetchone()
-                    if req is not None:
-                        if len(new_variables.split(',')) != int(req['windows']):
-                            flash('Not enough variables!')
-                        else:
-                            db.execute(
-                                'UPDATE rooms '
-                                'SET variables=? '
-                                'WHERE id=?', (new_variables,req['id'])
+                if req is not None:
+                    if len(new_variables.split(',')) != int(req['windows']):
+                        flash('Not enough variables!')
+                    else:
+                        db.execute(
+                            'UPDATE rooms '
+                            'SET variables=? '
+                            'WHERE id=?', (new_variables,req['id'])
                             )
-                            db.commit()
-                            with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
-                                file.write(new_variables)
+                        db.commit()
+                        with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
+                            file.write(new_variables)
 
 
     room = db.execute(
