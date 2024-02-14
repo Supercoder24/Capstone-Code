@@ -82,6 +82,61 @@ def room(name):
         db.commit()
     return render_template('control/room.html', room=room)
 
+@bp.route('/auth/override', methods=('GET','POST'))
+@login_required
+def override():         #Check override = True/False before updating room controls
+    db = get_db()
+    if request.method == 'POST':
+        new_variables = request.form['variables']
+        error = None
+
+        if not new_variables:
+           error = 'New variables are required.'
+
+        if error is not None:
+           flash(error)
+        else:
+            req = db.execute(
+                'SELECT user_id, admin FROM access'
+                'WHERE user_id=? AND admin = True', (g.user['id'])
+            ).fetchone()
+            if req is not None:
+                for _ in new_variables.split(","):
+                    if len(_)>=2:
+                        if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= -2)):
+                            if len(new_variables.split(',')) != int(db.execute('SELECT MAX(windows) FROM rooms')):
+                                flash('Not enough variables!')
+                            else:
+                                db.execute(
+                                    'UPDATE rooms'
+                                    'SET variables=?'
+                                    'WHERE roomname=override', (new_variables)
+                                )
+                                db.commit()
+                                with open(current_app.config['VARIABLES']+"pi_ips","r") as file:
+                                    for host in file.read().split(","):
+                                        req = db.execute(
+                                            'SELECT windows FROM rooms WHERE ip=?', (host)
+                                        )
+                                        with open (current_app.config['VARIABLES'] + host + '.txt', 'w') as room_file:
+                                            file.write(",".join(new_variables.split(",")[:req]))
+        room = db.execute(
+            'SELECT id, roomname, ip, picos, windows, variables FROM access '
+            'INNER JOIN rooms ON rooms.id=access.room_id '
+            'WHERE user_id=? AND roomname=override', (g.user['id'])
+        ).fetchone()
+        if room == None:
+            # Throw error and redirect
+            return redirect(url_for('auth.new'))
+        else:
+            db.execute(
+                'UPDATE access '
+                'SET last_accessed=current_timestamp '
+                'WHERE user_id=? and room_id=?', (g.user['id'], room['id'])
+            )
+            db.commit()
+        return render_template('control/room.html', room=room)
+
 
 #@bp.route('/create', methods=('GET', 'POST')) # Works the same way as /register in auth.py
 #@login_required # Decorator defined in auth.py will redirect to login if not logged in
