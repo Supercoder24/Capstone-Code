@@ -49,7 +49,7 @@ def room(name):
         'INNER JOIN rooms ON access.room_id = rooms.id '
         'WHERE user_id = ? AND roomname=?', (g.user['id'],name)
     ).fetchone()
-        if req !=None:
+        if req is not None:
             if len(_)>=2:
                 if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= -2)):
                     req = db.execute(
