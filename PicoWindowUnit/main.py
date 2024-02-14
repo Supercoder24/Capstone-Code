@@ -2,7 +2,7 @@ from machine import Pin
 import utime
 import ThreadStep as ThreadStep
 
-TILT_STEPS = 1024 # 4096 half steps per rev / 4 = 90 deg of steps
+TILT_STEPS = int(3 * 0.8 * 1024) # 4096 half steps per rev / 4 = 90 deg of steps
 MOTOR0 = ThreadStep.MOTOR0
 MOTOR1 = ThreadStep.MOTOR1
 
