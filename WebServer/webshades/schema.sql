@@ -12,6 +12,7 @@ CREATE TABLE users (
 CREATE TABLE access (
   user_id INTEGER NOT NULL,
   room_id INTEGER NOT NULL,
+  admin BOOLEAN NOT NULL,
   last_accessed TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP -- TODO: Set timestamp to some other default value
 );
 
