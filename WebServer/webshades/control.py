@@ -190,7 +190,32 @@ def override_individual(name):
         db.commit()
     return render_template('control/room.html', room=room)
 
+@bp.route('/auth/create', methods=('GET','POST'))
+@login_required
+def new_room():
+    db = get_db()
+    if request.method == 'POST':
+        specs = [request.form['roomname'],request.form['ip'],request.form['picos'],request.form['windows']]
+        error = None
+        if not specs:
+           error = 'New input are required.'
 
+        if error is not None:
+           flash(error)
+        else:
+            req = db.execute(
+                'SELECT user_id, admin FROM access'
+                'WHERE user_id=? AND admin = True', (g.user['id'])
+            ).fetchone()
+            if req is not None:
+                if db.execute('SELECT id WHERE rooms.id=?',(specs[0])) is None:
+                    specs.append(",".join(["m-1" for _ in range(specs[3])]))
+                    db.execute('INSERT INTO rooms(roomname,ip,picos,windows) VALUES ?',(specs)) # I may not work when you run me
+                    db.commit()
+                else:
+                    flash("A room already exists with that name.")
+    return render_template('auth/new.html')
+    
 #@bp.route('/create', methods=('GET', 'POST')) # Works the same way as /register in auth.py
 #@login_required # Decorator defined in auth.py will redirect to login if not logged in
 def create():
