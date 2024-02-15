@@ -178,7 +178,7 @@ def override_individual(name):
                                         file.write(new_variables)
                             else: flash("Input not in the correct format.")
                     else: flash("Input not in the correct format.")
-            else: flash("User {} does not have permissions to perform this action.".format(g.user['id']))
+            else: flash("User {} does not have permissions to perform this action.".format(db.execute('SELECT username FROM users WHERE id=?',(g.user['id']))))
     room = db.execute(
             'SELECT id, roomname, ip, picos, windows, variables FROM access '
             'INNER JOIN rooms ON rooms.id=access.room_id '
@@ -220,6 +220,6 @@ def new_room():
                     db.commit()
                 else:
                     flash("A room already exists with that name.")
-            else: flash("User {} does not have permissions to perform this action.".format(g.user['id']))
+            else: flash("User {} does not have permissions to perform this action.".format(db.execute('SELECT username FROM users WHERE id=?',(g.user['id']))))
     return render_template('auth/new.html')
 
