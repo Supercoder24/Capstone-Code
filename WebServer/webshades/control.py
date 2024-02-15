@@ -64,6 +64,7 @@ def room(name):
                                     db.commit()
                                     with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
                                         file.write(new_variables)
+                        else: flash("Input not in the correct format.")                
             else:
                 flash("Sorry, room {} is currently overwritten by the admins. If you think this is incorrect, feel free to send them a message.".format(name))
                 
@@ -123,6 +124,8 @@ def override():         #Check override = True/False before updating room contro
                                         )
                                         with open (current_app.config['VARIABLES'] + host + '.txt', 'w') as room_file:
                                             file.write(",".join(new_variables.split(",")[:req]))
+                        else: flash("Input not in the correct format.")
+                    else: flash("Input not in the correct format.")
         room = db.execute(
             'SELECT id, roomname, ip, picos, windows, variables FROM access '
             'INNER JOIN rooms ON rooms.id=access.room_id '
@@ -173,6 +176,9 @@ def override_individual(name):
                                 else:
                                     with open(current_app.config['VARIABLES'] + req['ip']+'.txt','w') as fileL
                                         file.write(new_variables)
+                            else: flash("Input not in the correct format.")
+                    else: flash("Input not in the correct format.")
+            else: flash("User {} does not have permissions to perform this action.".format(g.user['id']))
     room = db.execute(
             'SELECT id, roomname, ip, picos, windows, variables FROM access '
             'INNER JOIN rooms ON rooms.id=access.room_id '
@@ -214,84 +220,6 @@ def new_room():
                     db.commit()
                 else:
                     flash("A room already exists with that name.")
+            else: flash("User {} does not have permissions to perform this action.".format(g.user['id']))
     return render_template('auth/new.html')
-    
-#@bp.route('/create', methods=('GET', 'POST')) # Works the same way as /register in auth.py
-#@login_required # Decorator defined in auth.py will redirect to login if not logged in
-def create():
-    if request.method == 'POST':
-        title = request.form['title']
-        body = request.form['body']
-        error = None
 
-        if not title:
-            error = 'Title is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            db = get_db()
-            db.execute(
-                'INSERT INTO post (title, body, author_id)'
-                ' VALUES (?, ?, ?)',
-                (title, body, g.user['id'])
-            )
-            db.commit()
-            return redirect(url_for('blog.index'))
-
-    return render_template('blog/create.html')
-
-# To be used in update and delete views
-# Gets post data by id and also checks if author = logged in user
-def get_post(id, check_author=True):
-    post = get_db().execute(
-        'SELECT p.id, title, body, created, author_id, username'
-        ' FROM post p JOIN user u ON p.author_id = u.id'
-        ' WHERE p.id = ?',
-        (id,)
-    ).fetchone()
-
-    if post is None:
-        abort(404, f"Post id {id} doesn't exist.") # Abort returns the corresponding HTTP status code 404 = Not Found
-
-    if check_author and post['author_id'] != g.user['id']:
-        abort(403) # 403 = Forbidden
-
-    return post
-
-# To access this route elsewhere, must provide arguments: Ex: url_for('blog.update', id=post['id'])
-#@bp.route('/<int:id>/update', methods=('GET', 'POST')) # Takes one argument, the integer id (string by default without int:)
-#@login_required
-def update(id):
-    post = get_post(id)
-
-    if request.method == 'POST':
-        title = request.form['title']
-        body = request.form['body']
-        error = None
-
-        if not title:
-            error = 'Title is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            db = get_db()
-            db.execute(
-                'UPDATE post SET title = ?, body = ?' # UPDATE rather than INSERT
-                ' WHERE id = ?',
-                (title, body, id)
-            )
-            db.commit()
-            return redirect(url_for('blog.index'))
-
-    return render_template('blog/update.html', post=post)
-
-#@bp.route('/<int:id>/delete', methods=('POST',)) # Only handle post as no actual view. Redirects to index instead
-#@login_required
-def delete(id):
-    get_post(id)
-    db = get_db()
-    db.execute('DELETE FROM post WHERE id = ?', (id,))
-    db.commit()
-    return redirect(url_for('blog.index'))
