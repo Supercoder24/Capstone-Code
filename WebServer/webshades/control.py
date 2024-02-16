@@ -72,7 +72,7 @@ def room(name):
                 
 
     room = db.execute(
-        'SELECT id, roomname, ip, picos, windows, variables FROM access '
+        'SELECT id, roomname, main, windows, variables FROM access '
         'INNER JOIN rooms ON rooms.id=access.room_id '
         'WHERE user_id=? AND roomname=?', (g.user['id'], name)
     ).fetchone()
@@ -131,7 +131,7 @@ def override():         #Check override = True/False before updating room contro
                         else: flash("Input not in the correct format.")
                     else: flash("Input not in the correct format.")
         room = db.execute(
-            'SELECT id, roomname, ip, picos, windows, variables FROM access '
+            'SELECT id, roomname, main, windows, variables FROM access '
             'INNER JOIN rooms ON rooms.id=access.room_id '
             'WHERE user_id=? AND roomname=override', (g.user['id'])
         ).fetchone()
@@ -186,7 +186,7 @@ def override_individual(name):
                     else: flash("Input not in the correct format.")
             else: flash("User {} does not have permissions to perform this action.".format(db.execute('SELECT username FROM users WHERE id=?',(g.user['id']))))
     room = db.execute(
-            'SELECT id, roomname, ip, picos, windows, variables FROM access '
+            'SELECT id, roomname, main, windows, variables FROM access '
             'INNER JOIN rooms ON rooms.id=access.room_id '
             'WHERE user_id=? AND roomname=?', (g.user['id'], name)
         ).fetchone()
