@@ -23,5 +23,6 @@ CREATE TABLE rooms (
   picos INTEGER NOT NULL,
   windows INTEGER NOT NULL,
   override BOOLEAN NOT NULL,
+  main TEXT,
   variables TEXT
 ); -- TODO: Add last updated timestamp to rooms
