@@ -3,6 +3,7 @@
   padding: 0;
   margin-block-start: 0;
   margin-block-end: 0;
+  user-select: none;
 }
 
 html {
@@ -221,6 +222,9 @@ html {
     &.open .window-inside {
       height: 0;
       top: 0;
+      .window-slider {
+        display: none;
+      }
     }
 
     &.open .window-bar {
@@ -229,7 +233,7 @@ html {
 
     &.closed .window-outside {
       height: 0;
-      bottom: 0;
+      top: 0;
     }
 
     &.closed .window-inside {
