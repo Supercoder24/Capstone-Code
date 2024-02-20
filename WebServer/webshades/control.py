@@ -203,6 +203,92 @@ def override_individual(name):
         db.commit()
     return render_template('control/room.html', room=room)
 
+@bp.route('/room/<name>/newschedule', methods = ('GET','POST'))
+@login_required
+def new_schedule(name):
+    db = get_db()
+    if request.method == 'POST':
+        days = request.form['days']
+        tod = request.form['tod'] #Time of day
+        new_variables = request.form['variables']
+        error = None
+
+        if not new_variables:
+           error = 'New variables are required.'
+
+        if error is not None:
+           flash(error)
+        else:
+            for _ in new_variables.split(","):
+                if len(_)>=2:
+                    req = db.execute(
+                                'SELECT id, ip, windows FROM access '
+                                'INNER JOIN rooms ON rooms.id=access.room_id '
+                                'WHERE user_id=? AND roomname=?', (g.user['id'], name)
+                                ).fetchone()
+                    if req is not None:
+                                if len(new_variables.split(',')) != int(req['windows']):
+                                    flash('Not enough variables!')
+                                else:
+                                    db.execute('INSERT INTO schedule(room_id,countdown,days,vars,tod) VALUES ?',(req['id'],start_countdown(days,tod,new_variables),days,new_variables,tod))
+                                    db.commit()
+
+@bp.route("/room/<name>/<eventname>/editevent",methods = ('GET','POST'))
+@login_required
+def edit_event(name,event_name):
+     db = get_db()
+    if request.method == 'POST':
+        req = db.execute('SELECT days,tod,new_variables FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE event_name=? AND roomname = ?',(event_name,name))
+        days = request.form['days'] if request.form['days'] else req["days"]
+        tod = request.form['tod'] if request.form['tod'] else req["tod"]#Time of day 
+        new_variables = request.form['variables'] if request.form['variables'] else req["variables"]
+        error = None
+
+        if not new_variables:
+           error = 'New variables are required.'
+
+        if error is not None:
+           flash(error)
+        else:
+            for _ in new_variables.split(","):
+                if len(_)>=2:
+                    req = db.execute(
+                                'SELECT id, ip, windows FROM access '
+                                'INNER JOIN rooms ON rooms.id=access.room_id '
+                                'WHERE user_id=? AND roomname=?', (g.user['id'], name)
+                                ).fetchone()
+                    if req is not None:
+                                if len(new_variables.split(',')) != int(req['windows']):
+                                    flash('Not enough variables!')
+                                else:
+                                    db.execute('UPDATE schedule SET room_id=?,countdown=?,days=?,vars=?,tod=?) VALUES ?',(req['id'],start_countdown(days,tod,new_variables),days,new_variables,tod))
+                                    db.commit()
+
+@bp.route("/room/<name>/<eventname>/deleteevent",methods = ('GET','POST'))
+@login_required
+def delete_event(name,event_name):
+    if request.method == 'POST':
+        error = None
+
+        if error is not None:
+           flash(error)
+        else:
+            req = db.execute('SELECT id, event_name FROM schedule INNER JOIN rooms ON rooms.id=schedule.room_id WHERE roomname = ? AND event_name = ?',(name,event_name))
+            db.execute('DELETE FROM schedule WHERE event_name = ? AND id = ?',(event_name,req['id']))
+            db.commit()
+
+@bp.route("/room/<name>/getschedule", methods = ('GET','POST'))
+@login_required
+def get_events(name):
+     if request.method == 'POST':
+        error = None
+
+        if error is not None:
+           flash(error)
+        else:
+            sched_dict = exec_data(name)
+            # Do stuff with it mebbe
+
 @bp.route('/auth/create', methods=('GET','POST'))
 @login_required
 def new_room():
