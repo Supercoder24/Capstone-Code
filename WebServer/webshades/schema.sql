@@ -32,5 +32,5 @@ CREATE TABLE schedule (
   days TEXT NOT NULL,
   vars TEXT NOT NULL,
   tod TEXT NOT NULL,
-  event_name TEXT NOT NULL
+  event_name INTEGER PRIMARY KEY AUTOINCREMENT
   );
