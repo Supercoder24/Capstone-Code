@@ -15,11 +15,11 @@ Each template can extend a base template and override specific sections
       {% for name in g.rooms %}
         <li><a href="{{ url_for('control.room', name=name) }}">{{ name }}</a></li>
       {% endfor %}
-      <li><a href="{{ url_for('auth.new') }}">New Room</a></li>
+      <!--li><a href="{{ url_for('auth.new') }}">New Room</a></li-->
       <li><span>{{ g.user['username'] }}</span> <!--display username and log out if logged in-->
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
     {% else %}
-      <li><a href="{{ url_for('auth.register') }}">Register</a> <!--display register and log in if logged out-->
+      <!--li><a href="{{ url_for('auth.register') }}">Register</a--> <!--display register and log in if logged out-->
       <li><a href="{{ url_for('auth.login') }}">Log In</a>
     {% endif %}
   </ul>

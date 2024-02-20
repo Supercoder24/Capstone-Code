@@ -97,6 +97,9 @@ Each template can extend a base template and override specific sections
     'main': 'm50'
   }
   -->
+  {% for message in get_flashed_messages() %} <!--Loops through all messages sent with flash() command-->
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
   <script src="script.js">
     main = {{room['main']}}
     overrides = {{room['variables']}}.split(',')
