@@ -7,7 +7,7 @@ Each template can extend a base template and override specific sections
 -->
 <!doctype html>
 <title>Room
-  {{room['roomname']}} - Web Shades
+  a210 - Web Shades
 </title>
 <!--{{ room['roomname'] }}-->
 <link rel="stylesheet" href="main.css">
@@ -15,21 +15,32 @@ Each template can extend a base template and override specific sections
 <div id="main">
   <div id="tabs">
     <div class="open tab">
-      <h1>Room {{room['roomname']}}</h1>
+      <h1>Room a210</h1>
       <h2>Manual</h2>
     </div>
-    <!-- Extensions:
-    foreach other room: <div class="tab"></div>
+    <div class="tab">
+      <h1>Room a220</h1>
+      <h2>Automatic</h2>
+    </div>
+    <div class="tab">
+      <h1>Room a230</h1>
+      <h2>Scheduled</h2>
+    </div>
     <div id="new-room">+</div>
-    -->
   </div>
   <div id="controls">
     <div id="schedule">
-      <h1>{{schedule['now']}}</h1>
+      <h1>Monday 2/12/2024</h1>
       <ol>
-        {% for event in schedule['events'] %}
-        <li>{{ event }}</li>
-        {% endif %}
+        <li>8:15 - Social Engineering</li>
+        <li>9:20 - Social Engineering</li>
+        <li>10:25 - Social Engineering</li>
+        <li>11:30 - Lunch</li>
+        <li>12:55 - APUSH</li>
+        <li>2:00 - Capstone</li>
+        <li>3:00 - After School</li>
+        <li>4:00 - Evening</li>
+        <li>7:00 - Night</li>
       </ol>
     </div>
     <div id="main-controls">
@@ -82,26 +93,5 @@ Each template can extend a base template and override specific sections
   <div id="notice">
     Hold shift to stop
   </div>
-  <!-- From API: 
-  schedule = {
-    'variables': '2135,2143,51325,135'
-    'name': 'Social Engineering'
-    'events': [
-      '8:15 - Name'
-    ]
-    'now': 'Monday 2/20/2024'
-  }
-  room = {
-    'roomname': 'a210'
-    'variables': 'm35,,,m100'
-    'main': 'm50'
-  }
-  -->
-  <script src="script.js">
-    main = {{room['main']}}
-    overrides = {{room['variables']}}.split(',')
-    schedule = {{schedule['variables']}}.split(',')
-    eventName = {{schedule['name']}}
-    refresh()
-  </script>
+  <script src="script.js"></script>
 </div>

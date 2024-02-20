@@ -1,0 +1,339 @@
+* {
+  margin: 0;
+  padding: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  user-select: none;
+}
+
+html {
+  background-color: white;
+  color: color;
+  /* Custom colors */
+  --skyblue: #8BC4ED;
+  --lightgray: #D9D9D9;
+}
+
+#main {
+  display: grid;
+  grid-template-rows: 71px 40% auto 40px;
+  height: 100vh;
+}
+
+#tabs {
+  .tab {
+    cursor: pointer;
+    float: left;
+    display: block;
+    border-radius: 25px 25px 0 0;
+    padding: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 20px;
+    height: 60px;
+    border: none;
+    margin-right: 10px;
+    background-color: var(--lightgray);
+    width: 300px;
+
+    h1 {
+      font-size: 32px;
+    }
+
+    h2 {
+      font-size: 22px;
+    }
+
+    &.open {
+      margin-top: 10px;
+      height: 70px;
+      background-color: white;
+      border: 3px solid var(--lightgray);
+      border-bottom: 3px solid white;
+      color: black;
+
+      h1 {
+        font-size: 36px;
+      }
+
+      h2 {
+        font-size: 28px;
+      }
+    }
+  }
+
+  #new-room {
+    cursor: pointer;
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    font-size: 44px;
+    float: left;
+    border: none;
+    background-color: var(--lightgray);
+    text-align: center;
+    bottom: -30px;
+    font-weight: 1000;
+  }
+
+
+  height: 100px;
+  border-bottom: 3px solid var(--lightgray);
+}
+
+#controls {
+  border-bottom: 1.5px solid black;
+  display: grid;
+  grid-template-columns: 25% 40% 25%;
+  align-items: center;
+  justify-content: space-evenly;
+
+  #schedule {
+
+    h1 {
+      font-size: 18px;
+      border-bottom: 1px solid white;
+      padding: 2px;
+    }
+
+    ol {
+      max-height: 200px;
+      overflow-y: auto;
+      list-style-type: none;
+
+      li {
+        padding: 2px;
+        border-bottom: 1px dashed white;
+        font-size: 24px;
+        color: rgb(200,200,200);
+
+        &:nth-child(1) {
+          color: black;
+        }
+
+        &:nth-child(2) {
+          color: rgb(100,100,100);
+        }
+
+        &:nth-child(3) {
+          color: rgb(150, 150, 150);
+        }
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+
+  #main-controls {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+
+    #mode-selector {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      justify-content: space-evenly;
+      margin-bottom: 20px;
+      font-size: 50px;
+      width: 100%;
+
+      .mode {
+        cursor: pointer;
+
+        &.active {
+          text-shadow: 1px 1px 0 black, -1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black;
+          color: blue;
+        }
+      }
+    }
+
+    #main-value {
+      text-align: center;
+      font-size: 30px;
+    }
+
+    #main-slider {
+      cursor: pointer;
+      width: 100%;
+    }
+
+    #reset {
+      font-size: 18px;
+      margin-top: 10px;
+      max-width: 110px;
+    }
+  }
+}
+
+#windows {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  .window {
+    width: 125px;
+    height: calc(90% - 25px);
+    border: 2px outset white;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 25px;
+
+    &.override {
+      border: 2px outset yellow;
+    }
+
+    .window-outside {
+      background-color: var(--skyblue);
+      position: relative;
+    }
+    
+    /* Cool striped pattern
+    --percent: 0.2;
+    --slat: 20px;
+    */
+    --background: var(--skyblue);
+
+    .window-inside {
+      /* Cool striped pattern
+      background: repeating-linear-gradient(skyblue 0px, skyblue calc(((1 - var(--percent)) * var(--slat)) / 2), grey calc(((1 - var(--percent)) * var(--slat)) / 2), grey calc(((1 - var(--percent)) * var(--slat)) / 2 + var(--percent) * var(--slat)), skyblue calc(((1 - var(--percent)) * var(--slat)) / 2 + var(--percent) * var(--slat)), skyblue var(--slat));
+      */
+      background: var(--background);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .window-slider {
+        appearance: slider-vertical;
+        height: 90%;
+        width: 100px;
+
+        &::-webkit-slider-runnable-track {
+          border-radius: 12px;
+          box-shadow: 0 2px 1px 0px navy;
+        }
+      }
+
+
+    }
+
+    &.auto {
+      .window-inside {
+        .window-slider {
+          opacity: 0.5;
+        }
+
+        background: repeating-linear-gradient(-45deg, var(--skyblue), var(--skyblue) 10px, var(--lightgray) 10px, var(--lightgray) 20px)
+      }
+    }
+
+    .window-bar {
+      position: relative;
+      height: 24px;
+      text-align: center;
+      border: 1px solid white;
+      background: black;
+      cursor: pointer;
+      color: white;
+    }
+
+    .window-reset {
+      position: relative;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &.open {
+      .window-outside {
+        height: calc(100% - 25px);
+        top: 25px;
+      }
+      .window-inside {
+        height: 0;
+        top: 0;
+        .window-slider {
+          display: none;
+        }
+      }
+      .window-bar {
+        bottom: calc(100% - 25px);
+      }
+    }
+
+    &.closed {
+      .window-outside {
+        height: 0;
+        top: 0;
+      }
+
+      .window-inside {
+        height: calc(100% - 25px);
+        top: 0;
+      }
+
+      .window-bar {
+        bottom: 0;
+      }
+    }
+
+    &.stopped {
+      .window-outside {
+        height: calc(50% - 12.5px);
+        top: 25px;
+      }
+      
+      .window-inside {
+        height: calc(50% - 12.5px);
+        top: 0;
+        background: var(--lightgray);
+        .window-slider {
+          display: none;
+        }
+      }
+
+      .window-bar {
+        bottom: calc(50% - 12.5px);
+      }
+    }
+  }
+  button {
+    padding: 5px;
+  }
+}
+
+#master-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 5px; 
+
+  button {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+}
+
+button {
+  padding: 10px;
+  border-radius: 30px;
+  cursor: pointer;
+  background: var(--lightgray);
+  border: none;
+  width: 90px;
+}
+
+#notice {
+  text-align: center;
+  height: 16px;
+  font-size: 12px;
+  position: fixed;
+  bottom: 40px;
+  color: black;
+  width: 100%;
+}
