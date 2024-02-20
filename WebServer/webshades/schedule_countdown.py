@@ -4,8 +4,9 @@ from webshades.db import get_db
 def exec_data(name):
   dictionary = {}
   db = get_db()
-  req = db.execute('SELECT event_name, tod, days FROM schedule INNER JOIN rooms.id=schedule.room_id WHERE roomname = ?',(name))
+  req = db.execute('SELECT event_name, tod, days FROM schedule INNER JOIN rooms. id=schedule.room_id WHERE roomname = ?',(name))
   dt = datetime.now()-timedelta(hours=6) #Date & time CST (default: GMT)
+  dictionary["current_time"] = str((datetime.now()-timedelta(hours=6)).weekday()) + " " + str(datetime.now()-timedelta(hours=6))[0:10]
   for _ in req:
     dictionary[req[event_name]] = (str(req[tod]%12)+"pm" if tod[:2].isnumeric() and int(tod[:2])>=12 else str(req[tod])+"am") + (["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][((datetime.now()-timedelta(hours=6)).weekday()+([*(req["days"]+req["days"])[(datetime.now()-timedelta(hours=6)).weekday():]+(req["days"]+req["days"])[:(datetime.now()-timedelta(hours=6)).weekday()]]).index("1") if timedelta(days=(([*(req["days"]+req["days"])[(datetime.now()-timedelta(hours=6)).weekday():]+(req["days"]+req["days"])[:(datetime.now()-timedelta(hours=6)).weekday()])).index("1"),hours=int(tod.split(":")[0])-int(dt[0:10].split("-")+dt[11:19].split(":")[3]),minutes=int(tod.split(":")[1])-int(dt[0:10].split("-")+dt[11:19].split(":")[4]),seconds=0-int(dt[0:10].split("-")+dt[11:19].split(":")[5])).total_seconds() else (([*(req["days"]+req["days"])[(datetime.now()-timedelta(hours=6)).weekday():]+(req["days"]+req["days"])[:(datetime.now()-timedelta(hours=6)).weekday()])).replace("1","0", 1).index("1"))%7])
     
