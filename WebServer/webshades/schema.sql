@@ -27,10 +27,10 @@ CREATE TABLE rooms (
 ); -- TODO: Add last updated timestamp to rooms
 
 CREATE TABLE schedule (
-  room_id INTEGER NOT NULL
-  countdown TEXT NOT NULL
-  days TEXT NOT NULL
-  vars TEXT NOT NULL
-  tod TEXT NOT NULL
+  room_id INTEGER NOT NULL,
+  countdown TEXT NOT NULL,
+  days TEXT NOT NULL,
+  vars TEXT NOT NULL,
+  tod TEXT NOT NULL,
   event_name TEXT NOT NULL
   );
