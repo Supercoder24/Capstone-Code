@@ -28,7 +28,7 @@ CREATE TABLE rooms (
 
 CREATE TABLE schedule (
   room_id INTEGER NOT NULL
-  time TEXT NOT NULL
+  countdown TEXT NOT NULL
   days TEXT NOT NULL
   variables TEXT NOT NULL
   event_name TEXT NOT NULL
