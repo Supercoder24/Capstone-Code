@@ -288,7 +288,7 @@ def get_events(name):
         else:
             sched_dict = exec_data(name)
             # Do stuff with it mebbe
-
+    return render_template('control/room.html', schedule=sched_dict)
 @bp.route('/auth/create', methods=('GET','POST'))
 @login_required
 def new_room():
