@@ -1,18 +1,22 @@
 import time
 from datetime import datetime, timedelta
-#Every wednesday at 17:00
-target_day = "Wednesday"
-time_of_execution = "5:00"
-time_of_execution = time_of_execution.split(":")
-am_or_pm = "PM"
-time_of_execution[0] = str(int(time_of_execution[0]) + (12 if am_or_pm.lower() == "pm" else 0))
-dt = datetime.now()-timedelta(hours=6) #Date & time CST (default: GMT)
-today = dt.weekday()
-dt = str(dt)
-time_list = dt[0:10].split("-")+dt[11:19].split(":")
-week_list = ["monday", "tuesday", "wednesday", "thursday", "friday","saturday", "sunday"]
-day = week_list.index(target_day.lower())
-delta = timedelta(days=(day-today)%7,hours=int(time_of_execution[0])-int(time_list[3]),minutes=int(time_of_execution[1])-int(time_list[4]),seconds=0-int(time_list[5]))
-print(datetime.now()-timedelta(hours=6)+delta)
-seconds_until = delta - timedelta(hours=6)
-print(seconds_until.total_seconds())
+def start_countdown(input_list, time_of_execution, event_lapsed = False):
+  t = time_of_execution
+  i = input_list
+  time_of_execution = time_of_execution.split(":")
+  dt = datetime.now()-timedelta(hours=6) #Date & time CST (default: GMT)
+  today = dt.weekday()
+  today = 5
+  input_list+=input_list
+  changed_numbers = input_list[today:]+input_list[:today] if not event_lapsed else (input_list[today:]+input_list[:today]).replace("1","0", 1)
+  target_day = [*changed_numbers].index("1")
+  dt = str(dt)
+  time_list = dt[0:10].split("-")+dt[11:19].split(":")
+  delta = timedelta(days=target_day,hours=int(time_of_execution[0])-int(time_list[3]),minutes=int(time_of_execution[1])-int(time_list[4]),seconds=0-int(time_list[5]))
+  print(datetime.now()-timedelta(hours=6)+delta)
+  seconds_until = delta - timedelta(hours=6)
+  if int(seconds_until.total_seconds())<0:
+    start_countdown(input_list,t, True)
+  else:
+    next_occurrence = time.time()+int(seconds_until.total_seconds())
+    return next_occurrence
