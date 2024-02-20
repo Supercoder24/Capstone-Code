@@ -11,6 +11,7 @@ let lightgray = '#D9D9D9'
 
 // States
 let shiftKey = false
+let timeout = -1
 
 // Load new data from server
 let main = 'a50'
@@ -147,6 +148,12 @@ function refresh(options={}) {
     masterReset.onclick = () => {reset()}
   }
   // Schedule
+  if (timeout != -1) {
+    clearTimeout(timeout)
+    timeout = setTimeout(send, 3000)
+  } else {
+    timeout = 0
+  }
 }
 
 // Rendering
@@ -216,7 +223,6 @@ function addWindowListeners() {
     })
   }
 }
-refresh()
 
 // Reset
 function reset(index=-1) {
@@ -321,6 +327,21 @@ function mixColors(hex1, hex2, percent) {
   return rgbToHex([color1[0] * percent + color2[0] * (1 - percent),
   color1[1] * percent + color2[1] * (1 - percent),
   color1[2] * percent + color2[2] * (1 - percent)])
+}
+
+function send() {
+  fetch("http://172.28.0.10", {
+    method: "POST",
+    body: JSON.stringify({
+      'main': main,
+      'variables': overrides
+    }),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    }
+  })
+    .then((response) => response.json())
+    .then((json) => console.log(json));
 }
 
 /* Dragging attempt 1

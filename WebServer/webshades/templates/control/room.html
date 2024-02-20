@@ -1,22 +1,107 @@
-{% extends 'base.html' %}
-<!--See notes on register.html-->
-
-{% block header %}
-  <h1>{% block title %}Room {{room['roomname']}}{% endblock %}</h1>
-{% endblock %}
-
-{% block content %}
-    <article class="post">
-      <header>
-        <div>
-          <h1>Room {{room['roomname']}}</h1>
-        </div>
-      </header>
-      <p class="body">{{room['id']}} {{room['ip']}} {{room['picos']}} {{room['windows']}} {{room['variables']}}</p>
-      <form method="post">
-        <label for="variables">New Variables</label>
-        <input name="variables" id="variables" value="{{room['variables']}}" required> <!--required keyword is for client-side validation, but still always requires server-side validation-->
-        <input type="submit" value="Register">
-      </form>
-    </article>
-{% endblock %}
+<!-- 
+Uses Jinja for rendering
+Automatically escapes HTML, so user input is safe to display
+Python-style syntax
+Each template can extend a base template and override specific sections
+"block" means that it will be overriden by another template
+-->
+<!doctype html>
+<title>Room
+  {{room['roomname']}} - Web Shades
+</title>
+<!--{{ room['roomname'] }}-->
+<link rel="stylesheet" href="main.css">
+<!--{{ url_for('static', filename='main.css') }}"-->
+<div id="main">
+  <div id="tabs">
+    <div class="open tab">
+      <h1>Room {{room['roomname']}}</h1>
+      <h2>Manual</h2>
+    </div>
+    <!-- Extensions:
+    foreach other room: <div class="tab"></div>
+    <div id="new-room">+</div>
+    -->
+  </div>
+  <div id="controls">
+    <div id="schedule">
+      <h1>{{schedule['now']}}</h1>
+      <ol>
+        {% for event in schedule['events'] %}
+        <li>{{ event }}</li>
+        {% endif %}
+      </ol>
+    </div>
+    <div id="main-controls">
+      <div id="mode-selector">
+        <div title="Automatic" class="mode active" id="auto" onclick="changeMode('a')">A</div>
+        <div title="Manual" class="mode" id="man" onclick="changeMode('m')">M</div>
+        <div title="Scheduled" class="mode" id="sched" onclick="changeMode('s')">S</div>
+      </div>
+      <div id="main-value">50%</div>
+      <input id="main-slider" type="range" min="0" max="100">
+      <button id="reset" onclick="reset()">Reset</button>
+    </div>
+    <div id="presets"></div>
+  </div>
+  <div id="windows">
+    <div class="window open override">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="100">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Click to Close</div>
+    </div>
+    <div class="window closed override">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="0">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Click to Open</div>
+    </div>
+    <div class="window closed override">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="50">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Click to Open</div>
+    </div>
+    <div class="window closed auto">
+      <div class="window-inside">
+        <input class="window-slider" type="range" min="0" max="100" value="50">
+      </div>
+      <div class="window-outside"></div>
+      <div class="window-bar">Click to Open</div>
+    </div>
+  </div>
+  <div id="master-controls">
+    <button onclick="tiltOpen()">Tilt Open</button>
+    <button onclick="closeAll()">Close All</button>
+    <button onclick="raiseAll()">Raise All</button>
+  </div>
+  <div id="notice">
+    Hold shift to stop
+  </div>
+  <!-- From API: 
+  schedule = {
+    'variables': '2135,2143,51325,135'
+    'name': 'Social Engineering'
+    'events': [
+      '8:15 - Name'
+    ]
+    'now': 'Monday 2/20/2024'
+  }
+  room = {
+    'roomname': 'a210'
+    'variables': 'm35,,,m100'
+    'main': 'm50'
+  }
+  -->
+  <script src="script.js">
+    main = {{room['main']}}
+    overrides = {{room['variables']}}.split(',')
+    schedule = {{schedule['variables']}}.split(',')
+    eventName = {{schedule['name']}}
+    refresh()
+  </script>
+</div>
