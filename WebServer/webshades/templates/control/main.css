@@ -327,3 +327,13 @@ button {
   border: none;
   width: 90px;
 }
+
+#notice {
+  text-align: center;
+  height: 16px;
+  font-size: 12px;
+  position: fixed;
+  bottom: 40px;
+  color: black;
+  width: 100%;
+}

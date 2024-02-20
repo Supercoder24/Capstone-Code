@@ -45,9 +45,9 @@ Each template can extend a base template and override specific sections
     </div>
     <div id="main-controls">
       <div id="mode-selector">
-        <div class="mode active" id="auto" onclick="changeMode('a')">A</div>
-        <div class="mode" id="man" onclick="changeMode('m')">M</div>
-        <div class="mode" id="sched" onclick="changeMode('s')">S</div>
+        <div title="Automatic" class="mode active" id="auto" onclick="changeMode('a')">A</div>
+        <div title="Manual" class="mode" id="man" onclick="changeMode('m')">M</div>
+        <div title="Scheduled" class="mode" id="sched" onclick="changeMode('s')">S</div>
       </div>
       <div id="main-value">50%</div>
       <input id="main-slider" type="range" min="0" max="100">
@@ -89,6 +89,9 @@ Each template can extend a base template and override specific sections
     <button onclick="tiltOpen()">Tilt Open</button>
     <button onclick="closeAll()">Close All</button>
     <button onclick="raiseAll()">Raise All</button>
+  </div>
+  <div id="notice">
+    Hold shift to stop
   </div>
   <script src="script.js"></script>
 </div>
