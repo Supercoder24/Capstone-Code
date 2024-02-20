@@ -46,7 +46,7 @@ def room(name):
             flash(error)
         else:
             if db.execute('SELECT override INNER JOIN rooms ON rooms.id=access.room_id WHERE override = True AND roomname=?',(name)) is not None:  #MAKE SURE TO CHANGE OVERRIDE WHEN OVERRIDDEN
-                new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in new_variables]
+                new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in new_variables])
                 for _ in new_variables.split(","):
                     if len(_)>=2 or _ == "s":
                         if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100) or _ == "s":
