@@ -20,9 +20,16 @@ CREATE TABLE rooms (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   roomname TEXT UNIQUE NOT NULL,
   ip TEXT NOT NULL,
-  picos INTEGER NOT NULL,
   windows INTEGER NOT NULL,
   override BOOLEAN NOT NULL,
   main TEXT,
   variables TEXT
 ); -- TODO: Add last updated timestamp to rooms
+
+CREATE TABLE schedule (
+  room_id INTEGER NOT NULL
+  time TEXT NOT NULL
+  days TEXT NOT NULL
+  variables TEXT NOT NULL
+  event_name TEXT NOT NULL
+  );
