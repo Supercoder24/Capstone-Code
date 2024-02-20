@@ -9,6 +9,9 @@
 html {
   background-color: black;
   color: white;
+  /* Custom colors */
+  --skyblue: #8BC4ED;
+  --lightgray: #D9D9D9;
 }
 
 #main {
@@ -42,7 +45,7 @@ html {
     }
 
     &.open {
-      background-color: grey;
+      background-color: var(--lightgray);
       margin-top: 10px;
       height: 40px;
 
@@ -160,22 +163,32 @@ html {
 
   .window {
     width: 100px;
-    height: 90%;
+    height: calc(90% - 25px);
     border: 2px outset white;
     margin-left: 10px;
     margin-right: 10px;
+    margin-bottom: 25px;
 
     &.override {
       border: 2px outset yellow;
     }
 
     .window-outside {
-      background-color: skyblue;
+      background-color: var(--skyblue);
       position: relative;
     }
+    
+    /* Cool striped pattern
+    --percent: 0.2;
+    --slat: 20px;
+    */
+    --background: var(--skyblue);
 
     .window-inside {
-      background-color: grey;
+      /* Cool striped pattern
+      background: repeating-linear-gradient(skyblue 0px, skyblue calc(((1 - var(--percent)) * var(--slat)) / 2), grey calc(((1 - var(--percent)) * var(--slat)) / 2), grey calc(((1 - var(--percent)) * var(--slat)) / 2 + var(--percent) * var(--slat)), skyblue calc(((1 - var(--percent)) * var(--slat)) / 2 + var(--percent) * var(--slat)), skyblue var(--slat));
+      */
+      background: var(--background);
       position: relative;
       display: flex;
       justify-content: center;
@@ -198,10 +211,10 @@ html {
     &.auto {
       .window-inside {
         .window-slider {
-          display: none;
+          opacity: 0.5;
         }
 
-        background: repeating-linear-gradient(-45deg, skyblue, skyblue 10px, grey 10px, grey 20px)
+        background: repeating-linear-gradient(-45deg, var(--skyblue), var(--skyblue) 10px, var(--lightgray) 10px, var(--lightgray) 20px)
       }
     }
 
@@ -214,35 +227,64 @@ html {
       cursor: pointer;
     }
 
-    &.open .window-outside {
-      height: calc(100% - 25px);
-      top: 25px;
+    .window-reset {
+      position: relative;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
-    &.open .window-inside {
-      height: 0;
-      top: 0;
-      .window-slider {
-        display: none;
+    &.open {
+      .window-outside {
+        height: calc(100% - 25px);
+        top: 25px;
+      }
+      .window-inside {
+        height: 0;
+        top: 0;
+        .window-slider {
+          display: none;
+        }
+      }
+      .window-bar {
+        bottom: calc(100% - 25px);
       }
     }
 
-    &.open .window-bar {
-      bottom: calc(100% - 25px);
+    &.closed {
+      .window-outside {
+        height: 0;
+        top: 0;
+      }
+
+      .window-inside {
+        height: calc(100% - 25px);
+        top: 0;
+      }
+
+      .window-bar {
+        bottom: 0;
+      }
     }
 
-    &.closed .window-outside {
-      height: 0;
-      top: 0;
-    }
+    &.stopped {
+      .window-outside {
+        height: calc(50% - 12.5px);
+        top: 25px;
+      }
+      
+      .window-inside {
+        height: calc(50% - 12.5px);
+        top: 0;
+        background: var(--lightgray);
+        .window-slider {
+          display: none;
+        }
+      }
 
-    &.closed .window-inside {
-      height: calc(100% - 25px);
-      top: 0;
-    }
-
-    &.closed .window-bar {
-      bottom: 0;
+      .window-bar {
+        bottom: calc(50% - 12.5px);
+      }
     }
   }
 }
