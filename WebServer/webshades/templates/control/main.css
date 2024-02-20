@@ -7,8 +7,8 @@
 }
 
 html {
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: color;
   /* Custom colors */
   --skyblue: #8BC4ED;
   --lightgray: #D9D9D9;
@@ -30,31 +30,34 @@ html {
     padding-left: 20px;
     padding-right: 20px;
     margin-top: 20px;
-    height: 30px;
-    border: 1px solid white;
+    height: 60px;
+    border: none;
     margin-right: 10px;
-    background-color: rgb(50, 50, 50);
+    background-color: var(--lightgray);
+    width: 300px;
 
     h1 {
-      font-size: 22px;
+      font-size: 32px;
     }
 
     h2 {
-      font-size: 12px;
-      text-align: center;
+      font-size: 22px;
     }
 
     &.open {
-      background-color: var(--lightgray);
       margin-top: 10px;
-      height: 40px;
+      height: 70px;
+      background-color: white;
+      border: 3px solid var(--lightgray);
+      border-bottom: 3px solid white;
+      color: black;
 
       h1 {
-        font-size: 26px;
+        font-size: 36px;
       }
 
       h2 {
-        font-size: 18px;
+        font-size: 28px;
       }
     }
   }
@@ -62,30 +65,31 @@ html {
   #new-room {
     cursor: pointer;
     position: relative;
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     border-radius: 100%;
-    font-size: 24px;
+    font-size: 44px;
     float: left;
-    border: 1px solid white;
-    background-color: rgb(50, 50, 50);
+    border: none;
+    background-color: var(--lightgray);
     text-align: center;
     bottom: -30px;
+    font-weight: 1000;
   }
 
-  border-bottom: 1px solid white;
+
+  height: 100px;
+  border-bottom: 3px solid var(--lightgray);
 }
 
 #controls {
-  border-bottom: 1px solid white;
+  border-bottom: 1.5px solid black;
   display: grid;
   grid-template-columns: 25% 40% 25%;
   align-items: center;
   justify-content: space-evenly;
 
   #schedule {
-    border: 1px solid white;
-    background-color: rgb(50, 50, 50);
 
     h1 {
       font-size: 18px;
@@ -101,9 +105,19 @@ html {
       li {
         padding: 2px;
         border-bottom: 1px dashed white;
+        font-size: 24px;
+        color: rgb(200,200,200);
 
-        &:nth-child(odd) {
-          background: black;
+        &:nth-child(1) {
+          color: black;
+        }
+
+        &:nth-child(2) {
+          color: rgb(100,100,100);
+        }
+
+        &:nth-child(3) {
+          color: rgb(150, 150, 150);
         }
 
         &:last-child {
@@ -131,7 +145,7 @@ html {
         cursor: pointer;
 
         &.active {
-          text-shadow: 1px 1px 0 white, -1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white;
+          text-shadow: 1px 1px 0 black, -1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black;
           color: blue;
         }
       }
@@ -162,11 +176,11 @@ html {
   align-items: center;
 
   .window {
-    width: 100px;
+    width: 125px;
     height: calc(90% - 25px);
     border: 2px outset white;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
     margin-bottom: 25px;
 
     &.override {
@@ -225,6 +239,7 @@ html {
       border: 1px solid white;
       background: black;
       cursor: pointer;
+      color: white;
     }
 
     .window-reset {
@@ -287,12 +302,16 @@ html {
       }
     }
   }
+  button {
+    padding: 5px;
+  }
 }
 
 #master-controls {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 5px; 
 
   button {
     margin-left: 5px;
@@ -301,7 +320,10 @@ html {
 }
 
 button {
-  padding: 5px;
-  border-radius: 15px;
+  padding: 10px;
+  border-radius: 30px;
   cursor: pointer;
+  background: var(--lightgray);
+  border: none;
+  width: 90px;
 }
