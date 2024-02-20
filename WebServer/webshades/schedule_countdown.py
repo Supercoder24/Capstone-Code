@@ -23,9 +23,9 @@ def start_countdown(input_list, time_of_execution, event_lapsed = False):
     return next_occurrence
 
 while True:
-  min = db.execute('SELECT MIN(countdown) FROM schedule')
+  min = db.execute('SELECT MIN(countdown) FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE main = s')
   if min < time.time():
-    req = db.execute('SELECT days, vars, tod, ip FROM schedule INNER JOIN rooms ON rooms.id=shedule.room_id WHERE countdown = ?',(min)).fetchone()
+    req = db.execute('SELECT days, vars, tod, ip FROM schedule INNER JOIN rooms ON rooms.id=schedule.room_id WHERE countdown = ?',(min)).fetchone()
     db.execute('UPDATE schedule SET countdown =? WHERE countdown = ? and vars=?',(start_countdown(req[0],req[2],True),min,req[1])
     db.execute('UPDATE rooms SET variables = ? WHERE ip = ?',(req[1],req[3])
     db.commit()
