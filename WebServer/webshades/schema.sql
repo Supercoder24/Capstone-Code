@@ -31,6 +31,6 @@ CREATE TABLE schedule (
   countdown TEXT NOT NULL
   days TEXT NOT NULL
   variables TEXT NOT NULL
-  time TEXT NOT NULL
+  tod TEXT NOT NULL
   event_name TEXT NOT NULL
   );
