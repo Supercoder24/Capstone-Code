@@ -3,6 +3,7 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 
+from webshades.schedule_countdown import start_countdown, exec_data
 from webshades.auth import login_required
 from webshades.db import get_db
 
@@ -45,7 +46,7 @@ def room(name):
             flash(error)
         else:
             if db.execute('SELECT override INNER JOIN rooms ON rooms.id=access.room_id WHERE override = True AND roomname=?',(name)) is not None:  #MAKE SURE TO CHANGE OVERRIDE WHEN OVERRIDDEN
-                new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in new_variables])
+                new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in new_variables]
                 for _ in new_variables.split(","):
                     if len(_)>=2 or _ == "s":
                         if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100) or _ == "s":
@@ -60,8 +61,8 @@ def room(name):
                                 else:
                                     db.execute(
                                         'UPDATE rooms '
-                                        'SET variables=? '
-                                        'WHERE id=?', (new_variables,req['id'])
+                                        'SET variables=?, main=? '
+                                        'WHERE id=?', (new_variables,main,req['id'])
                                         )
                                     db.commit()
                                     with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
@@ -111,7 +112,7 @@ def override():         #Check override = True/False before updating room contro
                 new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in new_variables])
                 for _ in new_variables.split(","):
                     if len(_)>=2:
-                        if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100):
+                        if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100) or _ == "s":
                             if len(new_variables.split(',')) != int(db.execute('SELECT MAX(windows) FROM rooms')):
                                 flash('Not enough variables!')
                             else:
@@ -152,7 +153,7 @@ def override():         #Check override = True/False before updating room contro
 def override_individual(name):
     db = get_db()
     if request.method == 'POST':
-        main_var = request.form['variables']
+        main_var = request.form['main']
         new_variables = request.form['variables']
         error = None
 
@@ -176,7 +177,7 @@ def override_individual(name):
                                 'WHERE user_id=? AND roomname=?', (g.user['id'], name)
                                 ).fetchone()
                         if req is not None:
-                            if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100):
+                            if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100) or _=="s":
                                 if len(new_variables.split(',')) != int(req['windows']):
                                     flash('Not enough variables!')
                                 else:
