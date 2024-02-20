@@ -30,7 +30,7 @@ CREATE TABLE schedule (
   room_id INTEGER NOT NULL
   countdown TEXT NOT NULL
   days TEXT NOT NULL
-  variables TEXT NOT NULL
+  vars TEXT NOT NULL
   tod TEXT NOT NULL
   event_name TEXT NOT NULL
   );
