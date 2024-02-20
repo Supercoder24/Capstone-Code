@@ -1,13 +1,20 @@
 import time
 from datetime import datetime, timedelta
 from webshades.db import get_db
+def exec_data(name):
+  dictionary = {}
+  db = get_db()
+  req = db.execute('SELECT event_name, tod, days FROM schedule INNER JOIN rooms.id=schedule.room_id WHERE roomname = ?',(name))
+  dt = datetime.now()-timedelta(hours=6) #Date & time CST (default: GMT)
+  for _ in req:
+    dictionary[req[event_name]] = (str(req[tod])+"pm" if tod[:2].isnumeric() and int(tod[:2])>=12 else str(req[tod])+"am") + (["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][((datetime.now()-timedelta(hours=6)).weekday()+([*(req["days"]+req["days"])[(datetime.now()-timedelta(hours=6)).weekday():]+(req["days"]+req["days"])[:(datetime.now()-timedelta(hours=6)).weekday()]]).index("1") if timedelta(days=(([*(req["days"]+req["days"])[(datetime.now()-timedelta(hours=6)).weekday():]+(req["days"]+req["days"])[:(datetime.now()-timedelta(hours=6)).weekday()])).index("1"),hours=int(tod.split(":")[0])-int(dt[0:10].split("-")+dt[11:19].split(":")[3]),minutes=int(tod.split(":")[1])-int(dt[0:10].split("-")+dt[11:19].split(":")[4]),seconds=0-int(dt[0:10].split("-")+dt[11:19].split(":")[5])).total_seconds() else (([*(req["days"]+req["days"])[(datetime.now()-timedelta(hours=6)).weekday():]+(req["days"]+req["days"])[:(datetime.now()-timedelta(hours=6)).weekday()])).replace("1","0", 1).index("1"))%7])
+    
 def start_countdown(input_list, time_of_execution, event_lapsed = False):
   t = time_of_execution
   i = input_list
   time_of_execution = time_of_execution.split(":")
   dt = datetime.now()-timedelta(hours=6) #Date & time CST (default: GMT)
   today = dt.weekday()
-  today = 5
   input_list+=input_list
   changed_numbers = input_list[today:]+input_list[:today] if not event_lapsed else (input_list[today:]+input_list[:today]).replace("1","0", 1)
   target_day = [*changed_numbers].index("1")
