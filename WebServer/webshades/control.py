@@ -181,7 +181,7 @@ def override_individual(name):
                                 if len(new_variables.split(',')) != int(req['windows']):
                                     flash('Not enough variables!')
                                 else:
-                                    with open(current_app.config['VARIABLES'] + req['ip']+'.txt','w') as fileL
+                                    with open(current_app.config['VARIABLES'] + req['ip']+'.txt','w') as file:
                                         file.write(new_variables)
                             else: flash("Input not in the correct format.")
                     else: flash("Input not in the correct format.")
@@ -236,7 +236,7 @@ def new_schedule(name):
 @bp.route("/room/<name>/<eventname>/editevent",methods = ('GET','POST'))
 @login_required
 def edit_event(name,event_name):
-     db = get_db()
+    db = get_db()
     if request.method == 'POST':
         req = db.execute('SELECT days,tod,new_variables FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE event_name=? AND roomname = ?',(event_name,name))
         days = request.form['days'] if request.form['days'] else req["days"]
@@ -280,7 +280,7 @@ def delete_event(name,event_name):
 @bp.route("/room/<name>/getschedule", methods = ('GET','POST'))
 @login_required
 def get_events(name):
-     if request.method == 'POST':
+    if request.method == 'POST':
         error = None
 
         if error is not None:
