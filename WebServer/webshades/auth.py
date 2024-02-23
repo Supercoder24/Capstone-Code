@@ -118,7 +118,6 @@ def new():
     if request.method == 'POST': # Submitted form data
         roomname = request.form['roomname']
         ip = request.form['ip']
-        picos = request.form['picos']
         windows = request.form['windows']
         db = get_db()
         error = None
@@ -130,8 +129,8 @@ def new():
                 variables = ','.join(['m-1' for i in range(int(windows))])
                 print('Vars: ' + variables)
                 db.execute(
-                    "INSERT INTO rooms (roomname, ip, picos, windows, variables) VALUES (?, ?, ?, ?, ?)",
-                    (roomname, ip, int(picos), int(windows), variables)
+                    "INSERT INTO rooms (roomname, ip, windows, variables) VALUES (?, ?, ?, ?)",
+                    (roomname, ip, int(windows), variables)
                 )
                 db.commit()
                 with open(current_app.config['VARIABLES'] + ip + '.txt', 'w') as file:
