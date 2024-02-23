@@ -294,7 +294,7 @@ def get_events(name):
 def new_room():
     db = get_db()
     if request.method == 'POST':
-        specs = [request.form['roomname'],request.form['ip'],request.form['picos'],request.form['windows']]
+        specs = [request.form['roomname'],request.form['ip'],request.form['windows']]
         error = None
         if not specs:
            error = 'New input are required.'
@@ -308,8 +308,8 @@ def new_room():
             ).fetchone()
             if req is not None:
                 if db.execute('SELECT id WHERE rooms.id=?',(specs[0])) is None:
-                    specs.append(",".join(["m-1" for _ in range(specs[3])]))
-                    db.execute('INSERT INTO rooms(roomname,ip,picos,windows) VALUES ?',(specs)) # I may not work when you run me
+                    specs.append(",".join(["m-1" for _ in range(specs[2])]))
+                    db.execute('INSERT INTO rooms(roomname,ip,windows) VALUES ?',(specs)) # I may not work when you run me
                     db.commit()
                 else:
                     flash("A room already exists with that name.")
