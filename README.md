@@ -8,12 +8,19 @@ Run these commands on a Raspberry Pi 4B+ after installing Raspbian and setting u
 4. Run <code>python3 -m venv .</code>
 5. Run <code>./bin/pip install flask python-dotenv</code>
 6. Create an empty file named pi_ips in backend/variables 
+7. Run <code>. ./bin/activate</code>
+8. Run <code>flask init-db</code>
+9. Run the web server
+10. Go to server:5000/auth/login
+11. Login with the default credentials
+10. Go to auth/new
+11. Create rooms
 
 ## Run Web Server
 1. Enter <code>backend</code> folder
 2. Run <code>. ./bin/activate</code>
 3. Run <code>python3 backend.py &</code>
-4. Run <code>flask run</code>
+4. Run <code>flask run -h=0.0.0.0</code> (or forward port 5000 and omit -h=0.0.0.0)
 
 ## Setup Zero Controller
 Run these commands on a Raspberry Pi Zero after installing Raspbian and setting up SSH
