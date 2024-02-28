@@ -20,7 +20,7 @@ Run these commands on a Raspberry Pi 4B+ after installing Raspbian and setting u
 1. Enter <code>backend</code> folder
 2. Run <code>. ./bin/activate</code>
 3. Run <code>python3 backend.py &</code>
-4. Run <code>flask run -h=0.0.0.0</code> (or forward port 5000 and omit -h=0.0.0.0)
+4. Run <code>flask run --host=0.0.0.0</code> (or forward port 5000 and omit --host=0.0.0.0)
 
 ## Setup Zero Controller
 Run these commands on a Raspberry Pi Zero after installing Raspbian and setting up SSH
