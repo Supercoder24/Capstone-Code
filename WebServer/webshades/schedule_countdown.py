@@ -1,6 +1,8 @@
 import time
 from datetime import datetime, timedelta
 from webshades.db import get_db
+import sqlite3
+from flask import current_app
 def exec_data(name):
   dictionary = {}
   db = get_db()
@@ -30,16 +32,25 @@ def start_countdown(input_list, time_of_execution, event_lapsed = False):
     next_occurrence = time.time()+int(seconds_until.total_seconds())
     return next_occurrence
 
-while True:
-  min = db.execute('SELECT MIN(countdown) FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE main = s')
-  if min < time.time():
-    req = db.execute('SELECT days, vars, tod, ip FROM schedule INNER JOIN rooms ON rooms.id=schedule.room_id WHERE countdown = ?',(min)).fetchone()
-    db.execute('UPDATE schedule SET countdown =? WHERE countdown = ? and vars=?',(start_countdown(req[0],req[2],True),min,req[1])
-    db.execute('UPDATE rooms SET variables = ? WHERE ip = ?',(req[1],req[3])
-    db.commit()
-    with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
-                                        file.write(new_variables)
-    continue
-  time.sleep(30)
+def count():
+  db = sqlite3.connect(
+              'var/webshades-instance/webshades.sqlite', # Connects to the file specified in configuration earlier
+              detect_types=sqlite3.PARSE_DECLTYPES
+          )
+  db.row_factory = sqlite3.Row
+  while True:
+    min = db.execute('SELECT MIN(countdown) FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE main = s')
+    if min < time.time():
+      req = db.execute('SELECT days, vars, tod, ip FROM schedule INNER JOIN rooms ON rooms.id=schedule.room_id WHERE countdown = ?',(min)).fetchone()
+      db.execute('UPDATE schedule SET countdown =? WHERE countdown = ? and vars=?',(start_countdown(req[0],req[2],True),min,req[1]))
+      db.execute('UPDATE rooms SET variables = ? WHERE ip = ?',(req[1],req[3]))
+      db.commit()
+      with open('variables/' + req['ip'] + '.txt', 'w') as file:
+                                          file.write(new_variables)
+      continue
+    time.sleep(30)
+
+if __name__ == "__main__":
+  count()
     
     

@@ -35,18 +35,34 @@ def index():
 def room(name):
     db = get_db()
     if request.method == 'POST':
-        main_var = request.form['main']
-        new_variables = request.form['variables']
-        error = None
+        print()
+        print()
+        print(request.json)
+        print()
+        print()
+        main_var = request.json['main']
+        overrides = request.json['variables']
+        errors = []
 
-        if not new_variables:
-            error = 'New variables are required.'
+        print('Overrides: ' + str(overrides))
+        print('Main var: ' + str(main_var))
 
-        if error is not None:
-            flash(error)
+        if not overrides:
+            errors.append('Override is required.')
+        if not main_var:
+            errors.append('Main is required.')
+
+        if len(errors) > 0:
+            print(errors)
+            returned = {
+                'errors': errors
+            }
+            return returned
         else:
-            if db.execute('SELECT override INNER JOIN rooms ON rooms.id=access.room_id WHERE override = True AND roomname=?',(name)) is not None:  #MAKE SURE TO CHANGE OVERRIDE WHEN OVERRIDDEN
-                new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in new_variables])
+            print(name)
+            print()
+            if db.execute('SELECT override, roomname FROM access INNER JOIN rooms ON rooms.id=access.room_id WHERE override=0 AND roomname=?',(name,)).fetchone() is not None:  #MAKE SURE TO CHANGE OVERRIDE WHEN OVERRIDDEN
+                new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in overrides])
                 for _ in new_variables.split(","):
                     if len(_)>=2 or _ == "s":
                         if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100) or _ == "s":
@@ -56,21 +72,42 @@ def room(name):
                                 'WHERE user_id=? AND roomname=?', (g.user['id'], name)
                                 ).fetchone()
                             if req is not None:
-                                if len(new_variables.split(',')) != int(req['windows']):
-                                    flash('Not enough variables!')
+                                if len(new_variables.split(',')) != int(req['windows']):    
+                                    print('Wrong number of variables!')
+                                    errors.append('Wrong number of variables!')
+                                    returned = {
+                                        'errors': errors
+                                    }
+                                    return returned    
                                 else:
                                     db.execute(
                                         'UPDATE rooms '
                                         'SET variables=?, main=? '
-                                        'WHERE id=?', (new_variables,main,req['id'])
+                                        'WHERE id=?', (",".join(overrides),main_var,req['id'])
                                         )
                                     db.commit()
                                     with open(current_app.config['VARIABLES'] + req['ip'] + '.txt', 'w') as file:
                                         file.write(new_variables)
-                        else: flash("Input not in the correct format.")                
+                            returned = {
+                                'errors': errors,
+                                'success': 'Successfully updated room ' + name
+                            }
+                            return returned
+                        else:      
+                            print('Wrong format')
+                            errors.append('Wrong format')
+                            returned = {
+                                'errors': errors
+                            }
+                            return returned        
             else:
                 flash("Sorry, room {} is currently overwritten by the admins. If you think this is incorrect, feel free to send them a message.".format(name))
-                
+                print('Overwritten!')
+                errors.append('Overwritten!')
+                returned = {
+                    'errors': errors
+                }
+                return returned            
 
     room = db.execute(
         'SELECT id, roomname, main, windows, variables FROM access '
@@ -87,15 +124,24 @@ def room(name):
             'WHERE user_id=? and room_id=?', (g.user['id'], room['id'])
         )
         db.commit()
-    return render_template('control/room.html', room=room)
+    schedule = {
+        "name": "Ha",
+        "variables": 'm100',
+        'now': 'Tuesday Feb 27, 2024',
+        'events': [
+            '9:15 Social Engineering',
+            '10:20 Social Engineering'
+        ]
+    }
+    return render_template('control/room.html', room=room, schedule=schedule)
 
 @bp.route('/auth/override', methods=('GET','POST'))
 @login_required
 def override():         #Check override = True/False before updating room controls
     db = get_db()
     if request.method == 'POST':
-        main_var = request.form['main']
-        new_variables = request.form['variables']
+        main_var = request.json['main']
+        new_variables = request.json['variables']
         error = None
 
         if not new_variables:
@@ -105,7 +151,7 @@ def override():         #Check override = True/False before updating room contro
            flash(error)
         else:
             req = db.execute(
-                'SELECT user_id, admin FROM access'
+                'SELECT user_id, admin FROM users'
                 'WHERE user_id=? AND admin = True', (g.user['id'])
             ).fetchone()
             if req is not None:
@@ -153,8 +199,8 @@ def override():         #Check override = True/False before updating room contro
 def override_individual(name):
     db = get_db()
     if request.method == 'POST':
-        main_var = request.form['main']
-        new_variables = request.form['variables']
+        main_var = request.json['main']
+        new_variables = request.json['variables']
         error = None
 
         if not new_variables:
@@ -164,7 +210,7 @@ def override_individual(name):
            flash(error)
         else:
             req = db.execute(
-                'SELECT user_id, admin FROM access'
+                'SELECT user_id, admin FROM users'
                 'WHERE user_id=? AND admin = True', (g.user['id'])
             ).fetchone()
             if req is not None:
@@ -208,9 +254,9 @@ def override_individual(name):
 def new_schedule(name):
     db = get_db()
     if request.method == 'POST':
-        days = request.form['days']
-        tod = request.form['tod'] #Time of day
-        new_variables = request.form['variables']
+        days = request.json['days']
+        tod = request.json['tod'] #Time of day
+        new_variables = request.json['variables']
         error = None
 
         if not new_variables:
@@ -239,9 +285,9 @@ def edit_event(name,event_name):
     db = get_db()
     if request.method == 'POST':
         req = db.execute('SELECT days,tod,new_variables FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE event_name=? AND roomname = ?',(event_name,name))
-        days = request.form['days'] if request.form['days'] else req["days"]
-        tod = request.form['tod'] if request.form['tod'] else req["tod"]#Time of day 
-        new_variables = request.form['variables'] if request.form['variables'] else req["variables"]
+        days = request.json['days'] if request.json['days'] else req["days"]
+        tod = request.json['tod'] if request.json['tod'] else req["tod"]#Time of day 
+        new_variables = request.json['variables'] if request.json['variables'] else req["variables"]
         error = None
 
         if not new_variables:
@@ -303,7 +349,7 @@ def new_room():
            flash(error)
         else:
             req = db.execute(
-                'SELECT user_id, admin FROM access'
+                'SELECT user_id, admin FROM users'
                 'WHERE user_id=? AND admin = True', (g.user['id'])
             ).fetchone()
             if req is not None:

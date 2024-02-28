@@ -6,12 +6,16 @@ Each template can extend a base template and override specific sections
 "block" means that it will be overriden by another template
 -->
 <!doctype html>
+<html>
+<head>
 <title>Room
   a210 - Web Shades
 </title>
 <!--{{ room['roomname'] }}-->
 <link rel="stylesheet" href="main.css">
 <!--{{ url_for('static', filename='main.css') }}"-->
+</head>
+<body>
 <div id="main">
   <div id="tabs">
     <div class="open tab">
@@ -26,7 +30,7 @@ Each template can extend a base template and override specific sections
       <h1>Room a230</h1>
       <h2>Scheduled</h2>
     </div>
-    <div id="new-room">+</div>
+    <div id="new-room" onclick="changeTheme()">+</div>
   </div>
   <div id="controls">
     <div id="schedule">
@@ -94,4 +98,7 @@ Each template can extend a base template and override specific sections
     Hold shift to stop
   </div>
   <script src="script.js"></script>
+  <script>refresh()</script>
 </div>
+</body>
+</html>

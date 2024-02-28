@@ -26,8 +26,8 @@ def register():
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO users (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)), # generate_password_hash is important
+                    "INSERT INTO users (username, password, admin) VALUES (?, ?, ?)",
+                    (username, generate_password_hash(password), False), # generate_password_hash is important
                 ) # db library automatically prevents injection attacks
                 db.commit() # MUST COMMIT CHANGES after executing a modification to the database
                 user = db.execute(
@@ -126,15 +126,17 @@ def new():
             user_id = g.user['id']
             room_id = None
             try:
-                variables = ','.join(['m-1' for i in range(int(windows))])
+                variables = ','.join(['' for i in range(int(windows))])
+                main = 'm-1'
                 print('Vars: ' + variables)
                 db.execute(
-                    "INSERT INTO rooms (roomname, ip, windows, variables) VALUES (?, ?, ?, ?)",
-                    (roomname, ip, int(windows), variables)
+                    "INSERT INTO rooms (roomname, ip, windows, override, main, variables) VALUES (?, ?, ?, ?, ?, ?)",
+                    (roomname, ip, int(windows), False, main, variables)
                 )
                 db.commit()
+                new_variables = ",".join([main if not _.isnumeric() else "m"+_ for _ in variables])
                 with open(current_app.config['VARIABLES'] + ip + '.txt', 'w') as file:
-                    file.write(variables)
+                    file.write(new_variables)
                 room = db.execute(
                     'SELECT * FROM rooms WHERE roomname = ?', (roomname,)
                 ).fetchone()

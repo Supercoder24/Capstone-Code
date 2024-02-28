@@ -4,19 +4,38 @@
   margin-block-start: 0;
   margin-block-end: 0;
   user-select: none;
+  transition: background 0.25s, border-color 0.25s;
 }
 
 html {
   background-color: white;
-  color: color;
+  color: black;
   /* Custom colors */
   --skyblue: #8BC4ED;
   --lightgray: #D9D9D9;
+  --selected-background: white;
+  --selected-color: blue;
+  --selected-outline: black;
+  --borders: black;
+  --color: black;
+}
+
+.dark {
+  background-color: black;
+  color: white;
+  /* Custom colors */
+  --skyblue: #0095d2;
+  --lightgray: rgb(50,50,50);
+  --selected-background: black;
+  --selected-color: #0095d2;
+  --selected-outline: white;
+  --borders: white;
+  --color: white;
 }
 
 #main {
   display: grid;
-  grid-template-rows: 71px 40% auto 40px;
+  grid-template-rows: 101px 300px calc(100vh - 141px - 300px) 40px;
   height: 100vh;
 }
 
@@ -47,10 +66,10 @@ html {
     &.open {
       margin-top: 10px;
       height: 70px;
-      background-color: white;
+      background-color: var(--selected-background);
       border: 3px solid var(--lightgray);
-      border-bottom: 3px solid white;
-      color: black;
+      border-bottom: 3px solid var(--selected-background);
+      /* color: black; */
 
       h1 {
         font-size: 36px;
@@ -83,41 +102,58 @@ html {
 }
 
 #controls {
-  border-bottom: 1.5px solid black;
+  /* border-bottom: 1.5px solid var(--borders); */
   display: grid;
   grid-template-columns: 25% 40% 25%;
   align-items: center;
   justify-content: space-evenly;
+  max-height: 300px;
 
   #schedule {
 
+    
+
     h1 {
       font-size: 18px;
-      border-bottom: 1px solid white;
+      /* border-bottom: 1px solid white; */
       padding: 2px;
     }
 
     ol {
-      max-height: 200px;
+      max-height: 212px;
       overflow-y: auto;
       list-style-type: none;
+      &::-webkit-scrollbar {
+        background: var(--background);
+      }
+      &:hover {
+        &::-webkit-scrollbar-thumb {
+          background: var(--lightgray);
+          border-radius: 10px;
+          width: 10px;
+        }
+      }
 
       li {
         padding: 2px;
-        border-bottom: 1px dashed white;
+        /* border-bottom: 1px dashed white; */
         font-size: 24px;
-        color: rgb(200,200,200);
+        /* color: rgb(200,200,200); */
+        opacity: 0.4;
 
         &:nth-child(1) {
-          color: black;
+          /* color: black; */
+          opacity: 1;
         }
 
         &:nth-child(2) {
-          color: rgb(100,100,100);
+          /* color: rgb(100,100,100); */
+          opacity: 0.7;
         }
 
         &:nth-child(3) {
-          color: rgb(150, 150, 150);
+          /* color: rgb(150, 150, 150); */
+          opacity: 0.5;
         }
 
         &:last-child {
@@ -145,8 +181,9 @@ html {
         cursor: pointer;
 
         &.active {
-          text-shadow: 1px 1px 0 black, -1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black;
-          color: blue;
+          /* text-shadow: 0 0 2px var(--selected-outline); */
+          text-shadow: 1px 1px 0px var(--selected-outline), -1px 1px 0 var(--selected-outline), -1px -1px 0 var(--selected-outline), 1px -1px 0 var(--selected-outline);
+          color: var(--selected-color);
         }
       }
     }
@@ -176,12 +213,14 @@ html {
   align-items: center;
 
   .window {
-    width: 125px;
+    /* width: 125px; */
     height: calc(90% - 25px);
     border: 2px outset white;
     margin-left: 20px;
     margin-right: 20px;
     margin-bottom: 25px;
+    aspect-ratio: 0.27;
+    font-size: 14px;
 
     &.override {
       border: 2px outset yellow;
@@ -211,7 +250,7 @@ html {
       .window-slider {
         appearance: slider-vertical;
         height: 90%;
-        width: 100px;
+        width: 100%;
 
         &::-webkit-slider-runnable-track {
           border-radius: 12px;
@@ -233,8 +272,9 @@ html {
     }
 
     .window-bar {
+      padding-top: 3px;
       position: relative;
-      height: 24px;
+      height: 21px;
       text-align: center;
       border: 1px solid white;
       background: black;
@@ -326,6 +366,7 @@ button {
   background: var(--lightgray);
   border: none;
   width: 90px;
+  color: var(--color);
 }
 
 #notice {
@@ -334,6 +375,22 @@ button {
   font-size: 12px;
   position: fixed;
   bottom: 40px;
-  color: black;
   width: 100%;
+}
+
+#errors {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  .flash {
+    padding: 10px;
+    border-radius: 10px;
+    margin: 10px;
+    background: rgb(255,200,200);
+  }
+  .success {
+    background: rgb(200,255,200);
+  }
 }

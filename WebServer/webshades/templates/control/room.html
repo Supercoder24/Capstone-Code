@@ -9,9 +9,7 @@ Each template can extend a base template and override specific sections
 <title>Room
   {{room['roomname']}} - Web Shades
 </title>
-<!--{{ room['roomname'] }}-->
-<link rel="stylesheet" href="main.css">
-<!--{{ url_for('static', filename='main.css') }}"-->
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 <div id="main">
   <div id="tabs">
     <div class="open tab">
@@ -29,23 +27,23 @@ Each template can extend a base template and override specific sections
       <ol>
         {% for event in schedule['events'] %}
         <li>{{ event }}</li>
-        {% endif %}
+        {% endfor %}
       </ol>
     </div>
     <div id="main-controls">
       <div id="mode-selector">
-        <div title="Automatic" class="mode active" id="auto" onclick="changeMode('a')">A</div>
+        <div title="Automatic" class="mode" id="auto" onclick="changeMode('a')">A</div>
         <div title="Manual" class="mode" id="man" onclick="changeMode('m')">M</div>
         <div title="Scheduled" class="mode" id="sched" onclick="changeMode('s')">S</div>
       </div>
-      <div id="main-value">50%</div>
+      <div id="main-value">%</div>
       <input id="main-slider" type="range" min="0" max="100">
       <button id="reset" onclick="reset()">Reset</button>
     </div>
     <div id="presets"></div>
   </div>
   <div id="windows">
-    <div class="window open override">
+    <!-- <div class="window open override">
       <div class="window-inside">
         <input class="window-slider" type="range" min="0" max="100" value="100">
       </div>
@@ -72,7 +70,7 @@ Each template can extend a base template and override specific sections
       </div>
       <div class="window-outside"></div>
       <div class="window-bar">Click to Open</div>
-    </div>
+    </div> -->
   </div>
   <div id="master-controls">
     <button onclick="tiltOpen()">Tilt Open</button>
@@ -97,14 +95,17 @@ Each template can extend a base template and override specific sections
     'main': 'm50'
   }
   -->
-  {% for message in get_flashed_messages() %} <!--Loops through all messages sent with flash() command-->
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-  <script src="script.js">
-    main = {{room['main']}}
-    overrides = {{room['variables']}}.split(',')
-    schedule = {{schedule['variables']}}.split(',')
-    eventName = {{schedule['name']}}
+  <div id="errors">
+    {% for message in get_flashed_messages() %} <!--Loops through all messages sent with flash() command-->
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+  </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    main = "{{room['main']}}"
+    overrides = "{{room['variables']}}".split(',')
+    schedule = "{{schedule['variables']}}".split(',')
+    eventName = "{{schedule['name']}}"
     refresh()
   </script>
 </div>

@@ -6,8 +6,20 @@ Secret shortcuts:
 */
 
 // Styles
-let skyblue = '#8BC4ED'
-let lightgray = '#D9D9D9'
+let light = {
+  'skyblue': '#8BC4ED',
+  'lightgray': "#D9D9D9",
+}
+
+let dark = {
+  'skyblue': '#0095d2',
+  'lightgray': '#323232'
+}
+
+let theme = light
+
+let skyblue = '#0095d2'
+let lightgray = '#323232'
 
 // States
 let shiftKey = false
@@ -147,6 +159,7 @@ function refresh(options={}) {
     masterReset.innerText = 'Reset'
     masterReset.onclick = () => {reset()}
   }
+  document.getElementById('errors').innerHTML = ''
   // Schedule
   if (timeout != -1) {
     clearTimeout(timeout)
@@ -158,7 +171,7 @@ function refresh(options={}) {
 
 // Rendering
 function renderWindowColor(element, value, overriden, manual=false) {
-  element.style.setProperty('--background', mixColors(skyblue, lightgray, value/100))
+  element.style.setProperty('--background', mixColors(theme.skyblue, theme.lightgray, value/100))
   if (manual) {
     element.classList.remove('auto')
   }
@@ -319,18 +332,35 @@ function hexToRgb(hex) {
   return returned
 }
 function rgbToHex(rgb) {
-  return '#' + Math.round(rgb[0]).toString(16) + Math.round(rgb[1]).toString(16) + Math.round(rgb[2]).toString(16)
+  return '#' + Math.round(rgb[0]).toString(16).padStart(2,'0') + Math.round(rgb[1]).toString(16).padStart(2,'0') + Math.round(rgb[2]).toString(16).padStart(2,'0')
 }
 function mixColors(hex1, hex2, percent) {
   let color1 = hexToRgb(hex1)
   let color2 = hexToRgb(hex2)
-  return rgbToHex([color1[0] * percent + color2[0] * (1 - percent),
+  console.log('Color1',color1,'Color2',color2)
+  let returned = rgbToHex([color1[0] * percent + color2[0] * (1 - percent),
   color1[1] * percent + color2[1] * (1 - percent),
   color1[2] * percent + color2[2] * (1 - percent)])
+  console.log('Return', returned)
+  return returned
+}
+
+function changeTheme() {
+  if (theme.skyblue == light.skyblue) {
+    // Change to Dark Theme
+    document.getElementsByTagName('html')[0].classList.add('dark')
+    theme = dark
+  } else {
+    // Change to Light Theme
+    document.getElementsByTagName('html')[0].classList.remove('dark')
+    theme = light
+  }
+  refresh()
 }
 
 function send() {
-  fetch("http://172.28.0.10", {
+  console.log('Sending: Main: ', main, ', Overrides: ', overrides)
+  fetch("", {
     method: "POST",
     body: JSON.stringify({
       'main': main,
@@ -339,9 +369,26 @@ function send() {
     headers: {
       "Content-type": "application/json; charset=UTF-8"
     }
+  }).then(response => response.json()).then((response) => { // console.log(response); return response.json()}).then((response) => {
+    console.log(response)
+    let eElement = document.getElementById('errors')
+    eElement.innerHTML = ''
+    if (response.errors && response.errors.length > 0) {
+      for (let i = 0;i < response.errors.length; i++) {
+        let error = document.createElement('div')
+        error.classList.add('flash')
+        error.innerText = response.errors[i]
+        eElement.appendChild(error)
+      }
+    }
+    if (response.success) {
+      let error = document.createElement('div')
+      error.classList.add('flash')
+      error.classList.add('success')
+      error.innerText = response.success
+      eElement.appendChild(error)
+    }
   })
-    .then((response) => response.json())
-    .then((json) => console.log(json));
 }
 
 /* Dragging attempt 1
