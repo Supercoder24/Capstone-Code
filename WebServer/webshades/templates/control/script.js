@@ -28,8 +28,42 @@ let timeout = -1
 // Load new data from server
 let main = 'a50'
 let overrides = 'm100,,m-2,'.split(',')
-let schedule = 'm55,m0,m-2,a50,a50'.split(',')
-let eventName = 'Social Engineering'
+
+let scheduleIn = {
+  "name": "Social Engineering",
+  "variables": "m55,m0,m-2,a50,a50",
+  'now': 'Friday Mar 8, 2024',
+  'events': [
+    [9, 'Morning', '6:00', '11111111', 600],
+    [0, 'Social Engineering', '8:15', '1111000', 815],
+    [1, 'Social Engineering', '9:20', '1111000', 920],
+    [2, 'Social Engineering', '10:25', '1111000', 1025],
+    [3, 'Lunch', '11:30', '1111000', 1130],
+    [4, 'APUSH', '12:55', '1111000', 1255],
+    [5, 'Capstone', '2:00', '1111000', 1400],
+    [6, 'After School', '3:00', '1111000', 1500],
+    [7, 'Evening', '4:00', '1111100', 1600],
+    [8, 'Night', '7:00', '1111111', 1900]
+  ],
+  'dayOfWeek': 4, // 0 = Monday
+  'timeOfDay': 600, // 0000 = midnight CST
+}
+
+let eventIndex = -1
+
+// let schedule = 'm55,m0,m-2,a50,a50'.split(',')
+let schedule = scheduleIn.variables.split(',')
+let eventName = scheduleIn.name
+// let eventName = 'Social Engineering'
+// # schedule = {
+//   #     "name": "Ha", # Name of the current event - from Cole
+//   #     "variables": 'm100', # Variables for the current event - from Cole
+//   #     'now': 'Tuesday Feb 27, 2024', # Date formatting
+//   #     'events': [
+//   #         '9:15 Social Engineering', # [id, stringOfName, stringOfTime, stringOfDaysofWeek] # binary for days of week (mon, tues, wed...)
+//   #         '10:20 Social Engineering'
+//   #     ]
+//   # }
 function refresh(options={}) {
   // Window autopopulate
   let windowContainer = document.getElementById('windows')
@@ -236,6 +270,73 @@ function addWindowListeners() {
     })
   }
 }
+function addScheduleListeners() {
+  let items = document.getElementById('schedule').children[1].children
+  for (let i = 0; i < items.length; i++) {
+    items[i].dataset.eventIndex = i
+    items[i].addEventListener('contextmenu', (event) => {
+      console.log(event.target.dataset.eventIndex)
+      let contextmenu = document.getElementById('contextmenu')
+      contextmenu.style.left = event.pageX + 'px'
+      contextmenu.style.top = event.pageY + 'px'
+      contextmenu.style.display = 'block'
+      eventIndex = parseInt(event.target.dataset.eventIndex)
+      event.preventDefault()
+    })
+  }
+}
+
+function displaySchedule() {
+  let scheduleContainer = document.getElementById('schedule')
+  scheduleContainer.innerHTML = ''
+  let heading = document.createElement('h1')
+  heading.innerText = scheduleIn.now
+  scheduleContainer.appendChild(heading)
+  let list = document.createElement('ol')
+  for (let i = 0; i < scheduleIn.events.length; i++) {
+    let event = scheduleIn.events[i]
+    let element = document.createElement('li')
+    element.innerText = event[2] + ' - ' + event[1]
+    element.dataset.eventId = event[0]
+    list.appendChild(element)
+  }
+  scheduleContainer.appendChild(list)
+  addScheduleListeners()
+}
+
+displaySchedule()
+
+function renameEvent() {
+  if (eventIndex != -1) {
+    // console.log('Renaming: ', eventIndex)
+    let newName = prompt('What is the new name for event ' + scheduleIn.events[eventIndex][1] + '?')
+    if (newName) {
+      console.log('Renaming ' + eventIndex + ' to ' + newName)
+    }
+    // Need to request /room/<roomname>/<eventid>/renameevent
+    // Need to send new name
+  }
+}
+
+function editEvent() {
+  if (eventIndex != -1) {
+    console.log('Editing: ', eventIndex)
+    populateEventEditingPopup()
+    // Need to request /room/<roomname>/<eventid>/editevent
+    // Need to send days: 0111001
+    // Need to send tod: military time 700
+    // Need to send variables
+  }
+}
+
+function deleteEvent() {
+  if (eventIndex != -1) {
+    if (confirm('Are you sure you want to delete event ' + scheduleIn.events[eventIndex][1] + '?')) {
+      console.log('Deleting: ', eventIndex)
+      // Need to request /room/<roomname>/<eventid>/deleteevent
+    }
+  }
+}
 
 // Reset
 function reset(index=-1) {
@@ -390,6 +491,119 @@ function send() {
     }
   })
 }
+
+// Context menu appear
+// document.getElementById('schedule').addEventListener('contextmenu', (event) => {
+//   console.log(event)
+//   event.preventDefault()
+// })
+
+// pageX, pageY
+
+// Context menu disappear
+let hideContextMenu = (event) => {
+  let contextmenu = document.getElementById('contextmenu')
+  let editEventPopup = document.getElementById('editEventPopup')
+  if (!contextmenu.contains(event.target) && !editEventPopup.contains(event.target)) {
+    contextmenu.style.display = 'none'
+    closeEventPopup()
+    eventIndex = -1
+  }
+}
+document.addEventListener('click', hideContextMenu)
+
+function populateEventEditingPopup() {
+  if (eventIndex != -1) {
+    let editingContainer = document.getElementById('editEventPopup')
+    editingContainer.style.display = 'none'
+    editingContainer.innerHTML = ''
+
+    let heading = document.createElement('h1')
+    heading.innerText = 'Editing event ' + scheduleIn.events[eventIndex][1]
+    editingContainer.appendChild(heading)
+
+    let currentVariablesCheckbox = document.createElement('input')
+    currentVariablesCheckbox.type = 'checkbox'
+    currentVariablesCheckbox.id = 'applyNewVariables'
+    editingContainer.appendChild(currentVariablesCheckbox)
+
+    let currentVariablesLabel = document.createTextNode(' Use Current Variables (instead of Saved Variables)')
+    editingContainer.appendChild(currentVariablesLabel)
+    // editingContainer.innerHTML += ' Use Current Variables (instead of Saved Variables)'
+
+    editingContainer.appendChild(document.createElement('br'))
+
+    let timeInput = document.createElement('input')
+    console.log(timeInput)
+    timeInput.type = 'time'
+    timeInput.id = 'newTime'
+    let timeValue = Math.round(scheduleIn.events[eventIndex][4] / 100).toString().padStart(2, '0') + ':' + (scheduleIn.events[eventIndex][4] % 100).toString().padStart(2, '0')
+    // console.log(timeValue)
+    timeInput.value = timeValue
+    editingContainer.appendChild(timeInput)
+
+    let eventTimeLabel = document.createTextNode(' Event time')
+    editingContainer.appendChild(eventTimeLabel)
+    // editingContainer.innerHTML += ' Event time'
+
+    let subHeading = document.createElement('h2')
+    subHeading.innerText = 'Repeat on:'
+    editingContainer.appendChild(subHeading)
+
+    let daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    for (let i = 0; i < 7; i++) {
+      let checkbox = document.createElement('input')
+      checkbox.type = 'checkbox'
+      console.log('Checked? ', scheduleIn.events[eventIndex][3].charAt(i) == 1)
+      checkbox.checked = scheduleIn.events[eventIndex][3].charAt(i) == 1
+      editingContainer.appendChild(checkbox)
+
+      let dayLabel = document.createTextNode(' ' + daysOfWeek[i] + ' ')
+      editingContainer.appendChild(dayLabel)
+      // editingContainer.innerHTML += ' ' + daysOfWeek[i] + ' '
+    }
+    console.log('Val: ', timeInput.value)
+
+    let closeButton = document.createElement('button')
+    closeButton.innerText = 'Close'
+    closeButton.onclick = closeEventPopup
+    editingContainer.appendChild(closeButton)
+
+    let applyButton = document.createElement('button')
+    applyButton.innerText = 'Save'
+    applyButton.onclick = applyEventEdit
+    editingContainer.appendChild(applyButton)
+
+    editingContainer.style.display = 'block'
+  }
+}
+
+function applyEventEdit() {
+  if (eventIndex != -1) {
+    console.log('Applying!')
+    if (document.getElementById('applyNewVariables').checked) {
+      console.log('Updating variables')
+    }
+    let timeValue = document.getElementById('newTime').value
+    let timeInt = timeValue.split(':')[0] * 100 + parseInt(timeValue.split(':')[1])
+    console.log(timeInt)
+    let dayString = ''
+    for (let i = 0; i < 7; i++) {
+      dayString += document.getElementById('editEventPopup').getElementsByTagName('input')[i+2].checked ? '1' : '0'
+    }
+    console.log(dayString)
+  } else {
+    console.log('No event!')
+  }
+  closeEventPopup()
+}
+
+function closeEventPopup() {
+  document.getElementById('editEventPopup').style.display = 'none'
+}
+
+
+// !element.contains(event.target)
 
 /* Dragging attempt 1
 // Add data-mouse-down-at="0" data-old-percent="0" to each element

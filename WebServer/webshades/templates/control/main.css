@@ -394,3 +394,51 @@ button {
     background: rgb(200,255,200);
   }
 }
+
+ul#contextmenu {
+  background: var(--lightgray);
+  width: fit-content;
+  position: absolute;
+  top: 0px; /* 171 px */
+  left: 0px; /* 219 px */
+  list-style-type: none;
+  border: 1px solid var(--color);
+  box-shadow: 0px 2px 4px var(--color);
+  display: none;
+
+  li {
+    padding: 5px;
+    border-bottom: 1px dashed var(--color);
+    cursor: pointer;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+#editEventPopup {
+  width: fit-content;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--lightgray);
+  border-radius: 25px;
+  padding: 15px;
+  box-shadow: 0px 4px 4px;
+  text-align: center;
+  input {
+    margin-top: 5px;
+  }
+  h2 {
+    margin-top: 10px;
+  }
+  display: none;
+  button {
+    border: 1px solid black;
+    margin-top: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+}
