@@ -24,37 +24,47 @@ let lightgray = '#323232'
 // States
 let shiftKey = false
 let timeout = -1
+let lastMain = 'a50'
 
 // Load new data from server
 let main = 'a50'
 let overrides = 'm100,,m-2,'.split(',')
+let schedule = 'm55,m0,m-2,a50,a50'.split(',')
+let eventName = 'Social Engineering'
 
-let scheduleIn = {
-  "name": "Social Engineering",
-  "variables": "m55,m0,m-2,a50,a50",
-  'now': 'Friday Mar 8, 2024',
-  'events': [
-    [9, 'Morning', '6:00', '11111111', 600],
-    [0, 'Social Engineering', '8:15', '1111000', 815],
-    [1, 'Social Engineering', '9:20', '1111000', 920],
-    [2, 'Social Engineering', '10:25', '1111000', 1025],
-    [3, 'Lunch', '11:30', '1111000', 1130],
-    [4, 'APUSH', '12:55', '1111000', 1255],
-    [5, 'Capstone', '2:00', '1111000', 1400],
-    [6, 'After School', '3:00', '1111000', 1500],
-    [7, 'Evening', '4:00', '1111100', 1600],
-    [8, 'Night', '7:00', '1111111', 1900]
-  ],
-  'dayOfWeek': 4, // 0 = Monday
-  'timeOfDay': 600, // 0000 = midnight CST
+function showError(response) { // console.log(response); return response.json()}).then((response) => {
+  console.log(response)
+  let eElement = document.getElementById('errors')
+  console.log(eElement)
+  eElement.innerHTML = ''
+  if (typeof response == 'string') {
+    console.log('String')
+    let errorE = document.createElement('div')
+    errorE.classList.add('flash')
+    errorE.innerText = response
+    console.log(errorE)
+    eElement.appendChild(errorE)
+    console.log(eElement.innerHTML)
+  } else {
+    if (response.errors && response.errors.length > 0) {
+      for (let i = 0;i < response.errors.length; i++) {
+        let errorE = document.createElement('div')
+        errorE.classList.add('flash')
+        errorE.innerText = response.errors[i]
+        eElement.appendChild(errorE)
+      }
+    }
+    if (response.success) {
+      let errorE = document.createElement('div')
+      errorE.classList.add('flash')
+      errorE.classList.add('success')
+      errorE.innerText = response.success
+      eElement.appendChild(errorE)
+    }
+  }
+  console.log(eElement.innerHTML)
 }
 
-let eventIndex = -1
-
-// let schedule = 'm55,m0,m-2,a50,a50'.split(',')
-let schedule = scheduleIn.variables.split(',')
-let eventName = scheduleIn.name
-// let eventName = 'Social Engineering'
 // # schedule = {
 //   #     "name": "Ha", # Name of the current event - from Cole
 //   #     "variables": 'm100', # Variables for the current event - from Cole
@@ -70,6 +80,20 @@ function refresh(options={}) {
   windowContainer.innerHTML = ""
   let windows = overrides.join(',').split(',')
   console.log(windows)
+  if (main == 's') {
+    let valid = schedule.length == overrides.length
+    for (let i = 0; i < schedule.length; i++) {
+      if (schedule[i] == '') {
+        valid = false
+      }
+    }
+    if (!valid) {
+      main = lastMain
+      refresh()
+      showError('Invalid schedule')
+      return
+    }
+  }
   for (let i = 0; i < windows.length; i++) {
     let overriden = true
     if (windows[i] == '') {
@@ -470,25 +494,15 @@ function send() {
     headers: {
       "Content-type": "application/json; charset=UTF-8"
     }
-  }).then(response => response.json()).then((response) => { // console.log(response); return response.json()}).then((response) => {
-    console.log(response)
-    let eElement = document.getElementById('errors')
-    eElement.innerHTML = ''
-    if (response.errors && response.errors.length > 0) {
-      for (let i = 0;i < response.errors.length; i++) {
-        let error = document.createElement('div')
-        error.classList.add('flash')
-        error.innerText = response.errors[i]
-        eElement.appendChild(error)
-      }
+  }).then(response => response.json()).then((response) => {
+    if (response.main) {
+      main = response.main
     }
-    if (response.success) {
-      let error = document.createElement('div')
-      error.classList.add('flash')
-      error.classList.add('success')
-      error.innerText = response.success
-      eElement.appendChild(error)
+    if (response.variables) {
+      overrides = response.variables
     }
+    refresh()
+    showError(response)
   })
 }
 
@@ -604,6 +618,22 @@ function closeEventPopup() {
 
 
 // !element.contains(event.target)
+
+
+function newevent() {
+  fetch("/room/I%20have%20no%20clue/newschedule", {
+    method: "POST",
+    body: JSON.stringify({
+      'days': '1111111',
+      'variables': 'm23',
+        'tod': prompt('What time?'),
+        'eventName': prompt('What name?')
+    }),
+    headers: {
+      "Content-type": "application/json; charset=UTF-8"
+    }
+  }).then(response => console.log)
+}
 
 /* Dragging attempt 1
 // Add data-mouse-down-at="0" data-old-percent="0" to each element

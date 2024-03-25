@@ -80,6 +80,26 @@ Each template can extend a base template and override specific sections
   <div id="notice">
     Hold shift to stop
   </div>
+  <ul id="contextmenu">
+    <li onclick="renameEvent()">Rename</li>
+    <li onclick="editEvent()">Edit</li>
+    <li onclick="deleteEvent()">Delete</li>
+  </ul>
+  <div id="editEventPopup">
+    <h1>Editing event Social Engineering</h1>
+    <input type="checkbox"> Use Current Variables (instead of Saved Variables)
+    <br>
+    <input type="time"> Event time
+    <h2>Repeat on:</h2>
+    <input type="checkbox"> Monday
+    <input type="checkbox"> Tuesday
+    <input type="checkbox"> Wednesday
+    <input type="checkbox"> Thursday
+    <input type="checkbox"> Friday
+    <input type="checkbox"> Saturday
+    <input type="checkbox"> Sunday
+    <button>Close</button>
+  </div>
   <!-- From API: 
   schedule = {
     'variables': '2135,2143,51325,135'
