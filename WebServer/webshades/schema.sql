@@ -30,12 +30,17 @@ CREATE TABLE rooms (
 CREATE TABLE schedule (
   room_id INTEGER NOT NULL,
   countdown TEXT NOT NULL,
-  days TEXT NOT NULL,
+  day_string TEXT NOT NULL,
   vars TEXT NOT NULL,
   tod TEXT NOT NULL,
-  event_name INTEGER PRIMARY KEY AUTOINCREMENT
+  event_name TEXT NOT NULL,
+  id INTEGER PRIMARY KEY AUTOINCREMENT
   );
 
 INSERT INTO users (username, password, admin) VALUES ('admin', 
 'scrypt:32768:8:1$5wSzu8WLn0AFmsS6$fdda1b7dde224e08481e02a8217ef6f220eff26a53e51b948b2873ef925b9da6f33dc8ea13b49839dd115115f9cd7d5e68264dd26186a6781777eff72edf19c8',
 True);
+
+-- Test room:
+-- INSERT INTO rooms (roomname, ip, windows, override, main, variables) VALUES ('I have no clue', '172.28.0.11', 1, false, 'a50', 'm85')
+-- INSERT INTO access (user_id, room_id, last_accessed) VALUES (1, 1, '2024-03-22 14:40:19')

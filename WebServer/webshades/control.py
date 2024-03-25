@@ -39,10 +39,18 @@ def room(name):
         print()
         print(request.json)
         print()
-        print()
-        main_var = request.json['main']
-        overrides = request.json['variables']
+        print()   
         errors = []
+        try:
+            main_var = request.json['main']
+            overrides = request.json['variables']
+        except:     # great
+            print('Incorrect information')
+            errors.append('Incorrect information')
+            returned = {
+                'errors': errors
+            }
+            return returned 
 
         print('Overrides: ' + str(overrides))
         print('Main var: ' + str(main_var))
@@ -124,15 +132,27 @@ def room(name):
             'WHERE user_id=? and room_id=?', (g.user['id'], room['id'])
         )
         db.commit()
-    schedule = {
-        "name": "Ha",
-        "variables": 'm100',
-        'now': 'Tuesday Feb 27, 2024',
-        'events': [
-            '9:15 Social Engineering',
-            '10:20 Social Engineering'
-        ]
-    }
+        _ = db.execute(
+            "SELECT rooms.id, event_name, tod, vars, countdown, schedule.room_id, user_id, roomname FROM schedule INNER JOIN access ON schedule.room_id=access.room_id INNER JOIN rooms on schedule.room_id=rooms.id WHERE user_id=? AND roomname=? ORDER BY countdown",(g.user["id"],name)
+        ).fetchall() # List of tuples
+        schedule = {}
+        schedule['name'] = _[0][0] if len(_) > 0 else 'None'
+        schedule['variables'] = _[0][3] if len(_) > 0 else ''
+        # schedule['now'] = exec_data(name)['now']
+        schedule['events'] = [item['event_name'] for item in _]
+        
+        
+   # schedule = {
+   #     "name": "Ha", # Name of the current event - from Cole                     
+   #     "variables": 'm100', # Variables for the current event - from Cole        X
+   #     'now': 'Tuesday Feb 27, 2024', # Date formatting                          X
+   #     'events': [
+   #         '9:15 Social Engineering', # [id, stringOfName, stringOfTime, stringOfDaysofWeek] # binary for days of week (mon, tues, wed...)
+   #         '10:20 Social Engineering'
+   #     ]
+   # }
+        schedule = exec_data(name)
+        print('Schedule: ' + str(schedule))
     return render_template('control/room.html', room=room, schedule=schedule)
 
 @bp.route('/auth/override', methods=('GET','POST'))
@@ -252,11 +272,12 @@ def override_individual(name):
 @bp.route('/room/<name>/newschedule', methods = ('GET','POST'))
 @login_required
 def new_schedule(name):
-    db = get_db()
     if request.method == 'POST':
+        db = get_db()
         days = request.json['days']
         tod = request.json['tod'] #Time of day
         new_variables = request.json['variables']
+        event_name = request.json['eventName']
         error = None
 
         if not new_variables:
@@ -276,14 +297,26 @@ def new_schedule(name):
                                 if len(new_variables.split(',')) != int(req['windows']):
                                     flash('Not enough variables!')
                                 else:
-                                    db.execute('INSERT INTO schedule(room_id,countdown,days,vars,tod) VALUES ?',(req['id'],start_countdown(days,tod,new_variables),days,new_variables,tod))
+                                    db.execute('INSERT INTO schedule(room_id,countdown,day_string,vars,tod,event_name) VALUES (?, ?, ?, ?, ?, ?)',(req['id'],start_countdown(days,tod,new_variables),days,new_variables,tod,event_name))
                                     db.commit()
+    
+        _ = db.execute(
+            "SELECT rooms.id, event_name, tod, vars, countdown, schedule.room_id, user_id, roomname FROM schedule INNER JOIN access ON schedule.room_id=access.room_id INNER JOIN rooms on schedule.room_id=rooms.id WHERE user_id=? AND roomname=? ORDER BY countdown",(g.user["id"],name)
+        ).fetchall() # List of tuples
+        schedule = {}
+        # schedule['name'] = _[0][0] if len(_) > 0 else 'None'
+        # schedule['variables'] = _[0][3] if len(_) > 0 else ''
+        # # schedule['now'] = exec_data(name)['now']
+        # schedule['events'] = [item['event_name'] for item in _]
+        # schedule = exec_data(name) # Eventually return the new schedule
+        return schedule
+    return redirect('/')
 
 @bp.route("/room/<name>/<eventname>/editevent",methods = ('GET','POST'))
 @login_required
 def edit_event(name,event_name):
-    db = get_db()
     if request.method == 'POST':
+        db = get_db()
         req = db.execute('SELECT days,tod,new_variables FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE event_name=? AND roomname = ?',(event_name,name))
         days = request.json['days'] if request.json['days'] else req["days"]
         tod = request.json['tod'] if request.json['tod'] else req["tod"]#Time of day 
@@ -307,8 +340,18 @@ def edit_event(name,event_name):
                                 if len(new_variables.split(',')) != int(req['windows']):
                                     flash('Not enough variables!')
                                 else:
-                                    db.execute('UPDATE schedule SET room_id=?,countdown=?,days=?,vars=?,tod=?) VALUES ?',(req['id'],start_countdown(days,tod,new_variables),days,new_variables,tod))
+                                    db.execute('UPDATE schedule SET room_id=?,countdown=?,day_string=?,vars=?,tod=?) VALUES ?',(req['id'],start_countdown(days,tod,new_variables),days,new_variables,tod))
                                     db.commit()
+        
+        _ = db.execute(
+            "SELECT rooms.id, event_name, tod, vars, countdown, schedule.room_id, user_id, roomname FROM schedule INNER JOIN access ON schedule.room_id=access.room_id INNER JOIN rooms on schedule.room_id=rooms.id WHERE user_id=? AND roomname=? ORDER BY countdown",(g.user["id"],name)
+        ).fetchall() # List of tuples
+        schedule = {}
+        schedule['name'] = _[0][0] if len(_) > 0 else 'None'
+        schedule['variables'] = _[0][3] if len(_) > 0 else ''
+        schedule['now'] = exec_data(name)['current_time']
+        return schedule
+    return redirect('/')
 
 @bp.route("/room/<name>/<eventname>/deleteevent",methods = ('GET','POST'))
 @login_required
@@ -361,4 +404,3 @@ def new_room():
                     flash("A room already exists with that name.")
             else: flash("User {} does not have permissions to perform this action.".format(db.execute('SELECT username FROM users WHERE id=?',(g.user['id']))))
     return render_template('auth/new.html')
-
