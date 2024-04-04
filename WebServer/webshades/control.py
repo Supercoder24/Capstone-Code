@@ -73,7 +73,7 @@ def room(name):
             if db.execute('SELECT override, roomname FROM access INNER JOIN rooms ON rooms.id=access.room_id WHERE override=0 AND roomname=?',(name,)).fetchone() is not None:  #MAKE SURE TO CHANGE OVERRIDE WHEN OVERRIDDEN
                 new_variables = ",".join([main_var if not _.isnumeric() else "m"+_ for _ in overrides])
                 for i in range(len(new_variables.split(","))):
-                    _ = new_variables.split(",")[i] if new_variables.split(",")[i]!="s" else last[0].split(",")[i] # Might work, might explode 50/50     If it does explode, it has to do with the last[0] and may be fixed by replacing it with last
+                    _ = new_variables.split(",")[i] if new_variables.split(",")[i]!="s" else "a"+last[0].split(",")[i] # Might work, might explode 50/50     If it does explode, it has to do with the last[0] and may be fixed by replacing it with last
                     if len(_)>=2 or _ == "s":
                         if (_[:1] in ["a","m"] and (int(_[1:]) <= 100 and int(_[1:]) >= 0)) or (_[:1] == "m" and int(_[1:]) >= -2 and int(_[1:])<=100) or _ == "s":
                             req = db.execute(
