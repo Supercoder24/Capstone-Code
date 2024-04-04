@@ -3,6 +3,13 @@ from datetime import datetime, timedelta
 from webshades.db import get_db
 import sqlite3
 from flask import current_app
+
+global formatted_dict
+
+def schedule(name):
+     #Write code to sort by name and return only those with a certain name
+     new_dict = list(filter(NONE,[{"event_name":_["event_name"],"day":_["countdown"]} if _["roomname"] == name else "" for _ in formatted_dict]))
+     return new_dict    # Returns list of dictionaries with event name and a human readable day
 def exec_data(name):
   dictionary = {'events': []}
   db = get_db()
@@ -60,10 +67,12 @@ def count():
   while True:
     min = db.execute('SELECT MIN(countdown) FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE main = s')
     if min < time.time():
-      req = db.execute('SELECT day_string, vars, tod, ip FROM schedule INNER JOIN rooms ON rooms.id=schedule.room_id WHERE countdown = ?',(min)).fetchone()
+      req = db.execute('SELECT day_string, vars, tod, ip, id FROM schedule INNER JOIN rooms ON rooms.id=schedule.room_id WHERE countdown = ?',(min)).fetchone()
       db.execute('UPDATE schedule SET countdown =? WHERE countdown = ? and vars=?',(start_countdown(req[0],req[2],True),min,req[1]))
-      db.execute('UPDATE rooms SET variables = ? WHERE ip = ?',(req[1],req[3]))
+      db.execute('UPDATE rooms SET variables = ?, last_schedule = ? WHERE ip = ?',(req[1],req[1]+","+req[4],req[3]))   #Might work, unsure
       db.commit()
+      formatted_dict = db.execute('SELECT event_name, countdown, roomname FROM schedule INNER JOIN rooms ON rooms.id = schedule.room_id WHERE time<? AND time>? ORDER BY countdown',(time.time()+604800,time.time()))
+      formatted_dict = [{"event_name":_["event_name"],"countdown":"{} {}".format(["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][(datetime(year=1970,month=1,day=1)+timedelta(seconds=int(_["countdown"])-18000)).weekday()],str((datetime(year=1970,month=1,day=1)+timedelta(seconds=int(_["countdown"])-18000)))[11:16]),"roomname":_["roomname"]} for _ in formatted_dict] #Formats to human readable. Assumes sql database returns a list of dicts (ex. [{...},{...},{...}]). If sql returns dict of dicts, ex {1:{...},2:{...},3:{...}}, replace instances of _ with formatted_dict[_]
       with open('variables/' + req['ip'] + '.txt', 'w') as file:
                                           file.write(new_variables)
       continue
