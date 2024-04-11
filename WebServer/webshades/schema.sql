@@ -24,7 +24,8 @@ CREATE TABLE rooms (
   windows INTEGER NOT NULL,
   override BOOLEAN NOT NULL,
   main TEXT,
-  variables TEXT
+  variables TEXT,
+  last_schedule TEXT NOT NULL
 ); -- TODO: Add last updated timestamp to rooms
 
 CREATE TABLE schedule (
