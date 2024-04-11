@@ -3,11 +3,9 @@ Library for running two stepper motor simultaneously on Core 1 of a Raspberry Pi
 Designed and implemented by Felix Airhart in 2024
 
 Configuration:
-* configure(m0pins, m1pins, ?tilt_hs_dur, ?fast_hs_dur, ?max_steps)
+* configure(m0pins, m1pins, ?tilt_hs_dur, ?fast_hs_dur)
 
 Functions:
-* extend(motor, ?max_steps, ?hs_dur) (hs_dur is seconds between half steps)
-* retract(motor, ?max_steps, ?hs_dur)
 * tilt(motor, steps, ?hs_dur) (+ steps = closed)
 * stop(motor)
 
@@ -29,8 +27,14 @@ import utime
 
 TILT_HS_DUR = 0.005 # seconds per half step
 FAST_HS_DUR = 0.001 # seconds per half step
-MAX_STEPS = 360000 # maximum steps to try to hit limit switch on each end
-TILT_STEPS = 1024 # 4096 half steps per rev / 4 = 90 deg of steps
+steps = {
+    'm0': 1024, # 4096 half steps per rev / 4 = 90 deg of steps
+    'm1': 1024 # 4096 half steps per rev / 4 = 90 deg of steps
+}
+dirs = {
+    'm0': 1, # TODO: 1 = CW or CCW ?
+    'm1': 1 # TODO: 1 = CW or CCW ?
+}
 
 MOTOR0 = 'm0' # Counterclockwise = lower and tilt closed
 MOTOR1 = 'm1' # Clockwise = lower and tilt closed
@@ -45,32 +49,21 @@ m1pins = (Pin(6,Pin.OUT),
     Pin(8,Pin.OUT),
     Pin(9,Pin.OUT))
 
-limits = {
-    'm0': [Pin(10,Pin.IN,Pin.PULL_UP), # upper limit switch
-           Pin(11,Pin.IN,Pin.PULL_UP)], # lower limit switch
-    'm1': [Pin(12,Pin.IN,Pin.PULL_UP),
-           Pin(13,Pin.IN,Pin.PULL_UP)],
-}
-
-def configure(new_m0pins, new_m1pins, new_limitspins, new_tilt_steps):
+def configure(new_m0pins, new_m1pins, new_steps, new_dirs):
     global m0pins
     global m1pins
-    global limits
-    global TILT_STEPS
+    global steps
+    global dirs
     m0pins = new_m0pins
     m1pins = new_m1pins
-    limits[MOTOR0][0] = new_limitspins[0]
-    limits[MOTOR0][1] = new_limitspins[1]
-    limits[MOTOR1][0] = new_limitspins[2]
-    limits[MOTOR1][1] = new_limitspins[3]
-    TILT_STEPS = new_tilt_steps
+    steps = new_steps
+    dirs = new_dirs
 
 # Position:
-# * -2 all the way up, triggering limit switch
 # * -1 in between, no idea where
-# * 0 all the way down, but completely open
-# * y where 0 < y < TILT_STEPS all the way down, tilted between open and closed
-# * x where x = TILT_STEPS all the way down, completely closed, triggering limit switch
+# * 0 completely open
+# * y where 0 < y < steps[motor] all the way down, tilted between open and closed
+# * steps[motor] completely closed
 
 # ONLY THREAD CAN WRITE
 status = {
@@ -91,8 +84,8 @@ status = {
 
 def stat():
     print('Thread running: ' + str(status['threaded']))
-    print('Motor0 running:\t' + str(status[MOTOR0]['running']) + '\tJob: ' + str(status[MOTOR0]['job_id']) + '\t' + str(status[MOTOR0]['operation']) + '\tPosition: ' + str(status[MOTOR0]['position']) + '\tLimits: ' + str(limits[MOTOR0][0].value()) + ', ' + str(limits[MOTOR0][1].value()))
-    print('Motor1 running:\t' + str(status[MOTOR1]['running']) + '\tJob: ' + str(status[MOTOR1]['job_id']) + '\t' + str(status[MOTOR1]['operation']) + '\tPosition: ' + str(status[MOTOR1]['position']) + '\tLimits: ' + str(limits[MOTOR1][0].value()) + ', ' + str(limits[MOTOR1][1].value()))
+    print('Motor0 running:\t' + str(status[MOTOR0]['running']) + '\tJob: ' + str(status[MOTOR0]['job_id']) + '\t' + str(status[MOTOR0]['operation']) + '\tPosition: ' + str(status[MOTOR0]['position']))
+    print('Motor1 running:\t' + str(status[MOTOR1]['running']) + '\tJob: ' + str(status[MOTOR1]['job_id']) + '\t' + str(status[MOTOR1]['operation']) + '\tPosition: ' + str(status[MOTOR1]['position']))
 
 def stat_feed():
     while True:
@@ -101,11 +94,8 @@ def stat_feed():
 
 # Operations: 
 # * standby (doing nothing)
-# * calibrating (lowering to limit switch)
-# * extending (lowering to limit switch)
-# * retracting (raising to limit switch)
-# * opening (tilting away from limit switch)
-# * closing (tilting towards limit switch)
+# * opening (tilting towards horizontal)
+# * closing (tilting towards vertical)
 
 # THREAD CAN ONLY READ
 jobs = {
@@ -117,7 +107,6 @@ jobs = {
         'target': 0, # Tilting
         'tilt_hs_dur': TILT_HS_DUR,
         'fast_hs_dur': FAST_HS_DUR,
-        'max_steps': MAX_STEPS, # Calibrating
     },
     'm1': {
         'id': 0, # Increments automatically. Resets every 1024
@@ -126,7 +115,6 @@ jobs = {
         'target': 0, # Tilting
         'tilt_hs_dur': TILT_HS_DUR,
         'fast_hs_dur': FAST_HS_DUR,
-        'max_steps': MAX_STEPS, # Calibrating
     }
 }
 
@@ -230,9 +218,7 @@ def off(pins):
     pins[2].value(False)
     pins[3].value(False)
 
-# TODO: Limit switches
 # TODO: Choice: variable speeds for tilt and raise -or- consolidate speeds into 1 constant
-# TODO: Choice: implement max_steps support -or- remove max_steps
 def _stepperThread():
     global status
     global jobs
@@ -243,7 +229,6 @@ def _stepperThread():
             'target': 0, # Tilting
             'tilt_hs_dur': 0.001,
             'fast_hs_dur': 0.001,
-            'max_steps': 360000, # Calibrating
             'runs': 0,
         },
         'm1': {
@@ -252,7 +237,6 @@ def _stepperThread():
             'target': 0, # Tilting
             'tilt_hs_dur': 0.001,
             'fast_hs_dur': 0.001,
-            'max_steps': 360000, # Calibrating
             'runs': 0,
         }
     }
@@ -282,56 +266,28 @@ def _stepperThread():
                     doing[motor]['operation'] = jobs[motor]['operation']
                 doing[motor]['tilt_hs_dur'] = jobs[motor]['tilt_hs_dur']
                 doing[motor]['fast_hs_dur'] = jobs[motor]['fast_hs_dur']
-                doing[motor]['max_steps'] = jobs[motor]['max_steps']
                 doing[motor]['runs'] = 0
                 doing[motor]['id'] = jobs[motor]['id']
                 status[motor]['job_id'] = jobs[motor]['id']
                 # print('New job for ' + motor + ' loaded')
             if jobs[motor]['run']:
                 op = doing[motor]['operation']
-                if op == 'extending':
-                    if limits[motor][1].value() == 0: # Limit switch not pressed
-                        run[motor] = 1
+                if op == 'closing':
+                    if status[motor]['position'] < doing[motor]['target']:
                         status[motor]['running'] = True
-                        status[motor]['position'] = -1
+                        run[motor] = 1 * dirs[motor]
+                        new_position = status[motor]['position'] + 8
+                        if new_position > steps[motor]:
+                            new_position = steps[motor]
+                        status[motor]['position'] = new_position
                     else:
-                        status[motor]['position'] = TILT_STEPS
-                        status[motor]['running'] = False
-                        doing[motor]['operation'] = 'standby'
-                        status[motor]['operation'] = 'standby'
-                elif op == 'closing':
-                    if limits[motor][1].value() == 0: # Limit switch not pressed
-                        if status[motor]['position'] < doing[motor]['target']:
-                            status[motor]['running'] = True
-                            run[motor] = 1
-                            new_position = status[motor]['position'] + 8
-                            if new_position > TILT_STEPS:
-                                new_position = TILT_STEPS
-                            status[motor]['position'] = new_position
-                        else:
-                            status[motor]['running'] = False
-                            doing[motor]['operation'] = 'standby'
-                            status[motor]['operation'] = 'standby'
-                    else:
-                        status[motor]['position'] = TILT_STEPS
-                        status[motor]['running'] = False
-                        doing[motor]['operation'] = 'standby'
-                        status[motor]['operation'] = 'standby'
-                    # Maybe notify that ended early
-                elif op == 'retracting':
-                    if limits[motor][0].value() == 0: # Limit switch not pressed
-                        run[motor] = -1
-                        status[motor]['running'] = True
-                        status[motor]['position'] = -1
-                    else:
-                        status[motor]['position'] = -2
                         status[motor]['running'] = False
                         doing[motor]['operation'] = 'standby'
                         status[motor]['operation'] = 'standby'
                 elif op == 'opening':
                     if status[motor]['position'] > doing[motor]['target']:
                         status[motor]['running'] = True
-                        run[motor] = -1
+                        run[motor] = -1 * dirs[motor]
                         new_position = status[motor]['position'] - 8
                         if new_position < 0:
                             new_position = 0
@@ -397,35 +353,5 @@ def stop(motor="quit"):
         jobs["quit"] = True
     elif motor == MOTOR0 or motor == MOTOR1:
         jobs[motor]['run'] = False
-    else:
-        raise Exception("No motor specified!")
-    
-def retract(motor, max_steps=MAX_STEPS, hs_dur=FAST_HS_DUR):
-    if not status['threaded']:
-        _thread.start_new_thread(_stepperThread, ())
-    if motor == MOTOR0 or motor == MOTOR1:
-        jobs[motor]['fast_hs_dur'] = hs_dur
-        jobs[motor]['operation'] = 'retracting'
-        jobs[motor]['max_steps'] = max_steps
-        if jobs[motor]['id'] >= 1023:
-            jobs[motor]['id'] = 0
-        else:
-            jobs[motor]['id'] += 1
-        jobs[motor]['run'] = True
-    else:
-        raise Exception("No motor specified!")
-        
-def extend(motor, max_steps=MAX_STEPS, hs_dur=FAST_HS_DUR):
-    if not status['threaded']:
-        _thread.start_new_thread(_stepperThread, ())
-    if motor == MOTOR0 or motor == MOTOR1:
-        jobs[motor]['fast_hs_dur'] = hs_dur
-        jobs[motor]['operation'] = 'extending'
-        jobs[motor]['max_steps'] = max_steps
-        if jobs[motor]['id'] >= 1023:
-            jobs[motor]['id'] = 0
-        else:
-            jobs[motor]['id'] += 1
-        jobs[motor]['run'] = True
     else:
         raise Exception("No motor specified!")
