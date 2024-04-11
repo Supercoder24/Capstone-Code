@@ -29,8 +29,12 @@ let light = {
   // Load new data from server
   let main = 'a50'
   let overrides = 'm100,,m-2,'.split(',')
-  let schedule = 'm55,m0,m-2,a50,a50'.split(',')
+  let schedule = 'm55,m0,m-2,a50'.split(',')
   let eventName = 'Social Engineering'
+  let scheduleEvents = [
+    '8:15 - Event 1',
+    '9:15 - Event 2'
+  ]
   
   function showError(response) { // console.log(response); return response.json()}).then((response) => {
     console.log(response)
@@ -317,8 +321,8 @@ let light = {
     heading.innerText = scheduleIn.now
     scheduleContainer.appendChild(heading)
     let list = document.createElement('ol')
-    for (let i = 0; i < scheduleIn.events.length; i++) {
-      let event = scheduleIn.events[i]
+    for (let i = 0; i < scheduleEvents.length; i++) {
+      let event = scheduleEvents[i]
       let element = document.createElement('li')
       element.innerText = event[2] + ' - ' + event[1]
       element.dataset.eventId = event[0]
@@ -333,7 +337,7 @@ let light = {
   function renameEvent() {
     if (eventIndex != -1) {
       // console.log('Renaming: ', eventIndex)
-      let newName = prompt('What is the new name for event ' + scheduleIn.events[eventIndex][1] + '?')
+      let newName = prompt('What is the new name for event ' + scheduleEvents[eventIndex][1] + '?')
       if (newName) {
         console.log('Renaming ' + eventIndex + ' to ' + newName)
       }
@@ -355,7 +359,7 @@ let light = {
   
   function deleteEvent() {
     if (eventIndex != -1) {
-      if (confirm('Are you sure you want to delete event ' + scheduleIn.events[eventIndex][1] + '?')) {
+      if (confirm('Are you sure you want to delete event ' + scheduleEvents[eventIndex][1] + '?')) {
         console.log('Deleting: ', eventIndex)
         // Need to request /room/<roomname>/<eventid>/deleteevent
       }
@@ -533,7 +537,7 @@ let light = {
       editingContainer.innerHTML = ''
   
       let heading = document.createElement('h1')
-      heading.innerText = 'Editing event ' + scheduleIn.events[eventIndex][1]
+      heading.innerText = 'Editing event ' + scheduleEvents[eventIndex][1]
       editingContainer.appendChild(heading)
   
       let currentVariablesCheckbox = document.createElement('input')
@@ -551,7 +555,7 @@ let light = {
       console.log(timeInput)
       timeInput.type = 'time'
       timeInput.id = 'newTime'
-      let timeValue = Math.round(scheduleIn.events[eventIndex][4] / 100).toString().padStart(2, '0') + ':' + (scheduleIn.events[eventIndex][4] % 100).toString().padStart(2, '0')
+      let timeValue = Math.round(scheduleEvents[eventIndex][4] / 100).toString().padStart(2, '0') + ':' + (scheduleEvents[eventIndex][4] % 100).toString().padStart(2, '0')
       // console.log(timeValue)
       timeInput.value = timeValue
       editingContainer.appendChild(timeInput)
@@ -568,8 +572,8 @@ let light = {
       for (let i = 0; i < 7; i++) {
         let checkbox = document.createElement('input')
         checkbox.type = 'checkbox'
-        console.log('Checked? ', scheduleIn.events[eventIndex][3].charAt(i) == 1)
-        checkbox.checked = scheduleIn.events[eventIndex][3].charAt(i) == 1
+        console.log('Checked? ', scheduleEvents[eventIndex][3].charAt(i) == 1)
+        checkbox.checked = scheduleEvents[eventIndex][3].charAt(i) == 1
         editingContainer.appendChild(checkbox)
   
         let dayLabel = document.createTextNode(' ' + daysOfWeek[i] + ' ')

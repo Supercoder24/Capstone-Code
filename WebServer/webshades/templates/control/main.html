@@ -12,7 +12,7 @@ Each template can extend a base template and override specific sections
   a210 - Web Shades
 </title>
 <!--{{ room['roomname'] }}-->
-<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="../../static/main.css">
 <!--{{ url_for('static', filename='main.css') }}"-->
 </head>
 <body>
@@ -117,7 +117,9 @@ Each template can extend a base template and override specific sections
     <input type="checkbox"> Sunday
     <button>Close</button>
   </div>
-  <script src="script.js"></script>
+  <div id="errors">
+  </div>
+  <script src="../../static/script.js"></script>
   <script>refresh()</script>
 </div>
 </body>
