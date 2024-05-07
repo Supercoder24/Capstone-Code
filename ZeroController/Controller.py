@@ -7,12 +7,19 @@ found = 0
 ports = []
 pis = []
 unit_index = []
+light_found = False
+light_sensor = -1
+levels = [0,0]
+THRESHHOLD = 5
+debug = False
 
 # Default config for 8 window units
 config = {
     "connected": 8,
     "steps": [1024, 1024, 1024, 1024, 1024, 1024, 1024, 1024],
-    "dirs": [1, 1, 1, 1, 1, 1, 1, 1]
+    "dirs": [1, 1, 1, 1, 1, 1, 1, 1],
+    "ls_min": 1400,
+    "ls_max": 300
 }
 # {
 #     "connected": 8, # <int> # of window units connected
@@ -35,40 +42,67 @@ class Pi:
         self.port = port
         talker = Talker(self.port)
         talker.send('led = Pin(25, Pin.OUT);s = led.value')
+        # print(talker.receive())
         talker.close()
+        # print('found and initting')
+        typ = self.cmd('typ()')
+        self.typ = typ
+        print('Type: ', typ)
 
     def cmd(self, command, no_receive=False):
         try:
             talker = Talker(self.port)
-            talker.send('s(True)')
-            talker.send(command)
             received = ''
-            if not no_receive:
-                received = talker.receive()
-            talker.send('s(False)')
+            try:
+                talker.send('s(True)')
+                talker.send(command)
+                received = ''
+                if not no_receive:
+                    received = talker.receive()
+                    if debug:
+                        last_received = received
+                        while last_received != '>>>':
+                            print('got: ' + last_received)
+                            last_received = talker.receive()
+                talker.send('s(False)')
+                # if not no_receive:
+                # return received #TODO: INDENT AND UNCOMMENT IF
+            except Exception as e:
+                print('Failed to connect! {}'.format(e))
+                try:
+                    talker = Talker(self.port)
+                except Exception as e:
+                    print('Failed to connect! {}'.format(e))
             talker.close()
-            # if not no_receive:
-            return received #TODO: INDENT AND UNCOMMENT IF
+            return received
         except Exception as e:
             print('Failed to connect! {}'.format(e))
             return ':('
     
 
-while found < connected:
-    time.sleep(0.5)
+while found < connected or not light_found:
+    # time.sleep(0.5)
     for i in range(64):
         try:
             if i not in ports:
                 talker = Talker(i)
                 talker.close()
                 ports.append(i)
-                pis.append(Pi(i))
-                found += 2
-                for j in range(2):
-                    unit_index.append([i,j])
-                    print('Added window unit %s' % len(unit_index))
-                    print(unit_index)
-                print('Connected pico with 2 units')
+                new_pi = Pi(i)
+                pis.append(new_pi)
+                if (new_pi.typ == "'wu'"): # Window Unit
+                    found += 2
+                    for j in range(2):
+                        unit_index.append([len(pis) - 1,j])
+                        print('Added window unit %s' % len(unit_index))
+                        print(unit_index)
+                    print('Connected pico with 2 units')
+                elif (new_pi.typ == "'ls'"): # Light Sensor
+                    light_found = True
+                    light_sensor = len(pis) - 1
+                    print('Connected pico with light sensor')
+                else:
+                    print('Connected unknown pico')
                 break
         except Exception as e:
             if str(e)[0:2] != '[E':
@@ -79,8 +113,14 @@ print('Connected to all!')
 # TODO: NOTIFY/RECONNECT IF DISCONNECTED
 
 variables = []
+t = 0
 
 while True:
+    if debug:
+        print('LEVELS: ')
+    levels[0] = (int(pis[light_sensor].cmd('ls0.read_u16()')) - config['ls_min']) / (config['ls_max']-config['ls_min']) * 100
+    levels[1] = (int(pis[light_sensor].cmd('ls1.read_u16()')) - config['ls_min']) / (config['ls_max']-config['ls_min']) * 100
+    desired = [_/(len(variables)-1)*levels[0]+(1-_/(len(variables)-1))*levels[1] for _ in range(len(variables))]
     new_data = False
     with open('variables.txt', 'r') as file:
         data = file.read()
@@ -89,22 +129,47 @@ while True:
             variables = data.split(',')
             print(variables)
             new_data = True
+    changes = [-1 for _ in range(len(variables))]
+    # print(changes)
 
     # TODO: Only send changes if necessary
     for i in range(len(variables)):
         instruction = variables[i]
         mode = instruction[0:1]
-        value = instruction[1:]
+        value = instruction[1:] if i < len(variables) else instruction[1:-1]
+        # print('val: ' + value)
         pi = unit_index[i][0]
         motor = unit_index[i][1]
+        # print(i)
+        # print(len(changes))
+        # print()
         if mode == 'a':
+            num_blinds = len(variables)
+            bias = i/(num_blinds-1)
+            light_value = bias*levels[0]+(1-bias)*levels[1]
+            changes[i] = desired[i]+(light_value-desired[i])/2 if light_value-THRESHHOLD>desired[i] or light_value+THRESHHOLD<desired[i] else -1
             # TODO: AUTOMATIC OPERATION
-            pass
+            # Use levels[0] 0-100 left, levels[1] 0-100 right, i = index of window unit (0 on left)
+            #value = 0-100
+            #print('Unit ' + str(i) + ': ' + pis[pi].cmd('pos("m' + str(motor) + '",' + value + ')'))
         elif mode == 'm':
-            print('Unit ' + str(i) + ': ' + pis[pi].cmd('pos("m' + str(motor) + '",' + value + ')'))
+            changes[i] = value
+            #print('Unit ' + str(i) + ': ' + pis[pi].cmd('pos("m' + str(motor) + '",' + value + ')'))
+    if debug:
+        print('MOVING:')
+    for _ in range(len(changes)):
+        # if changes[_] != -1:
+        if debug:
+            print('passing in ' + str(unit_index[_][1]) + ' and ' + str(changes[_]))
+        stat = pis[unit_index[_][0]].cmd('pos("m' + str(unit_index[_][1]) + '",' + str(changes[_]) + ')')
+        if t > -1:
+            t = 0
+            print('Unit ' + str(_) + ': ' + stat)
+        else:
+            t += 1
 
     with open('config.json', 'r') as file:
-        next_config = file.read()
+        next_config = json.loads(file.read())
         for i in range(len(config['steps'])):
             pi = unit_index[i][0]
             motor = unit_index[i][1]

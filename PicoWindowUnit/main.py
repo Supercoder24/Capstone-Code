@@ -2,6 +2,9 @@ from machine import Pin
 import utime
 import ThreadStep as ThreadStep
 
+def typ():
+    return 'wu' # Window Unit
+
 steps = {
     'm0': int(3 * 0.8 * 1024), # 4096 half steps per rev / 4 = 90 deg of steps
     'm1': int(3 * 0.8 * 1024) # 4096 half steps per rev / 4 = 90 deg of steps
@@ -63,8 +66,7 @@ def pos(motor, position):
         ThreadStep.stop(motor)
         return 'stopped'
     elif position >= 0 and position <= 100:
-        if ThreadStep.status[motor]['position'] > -1:
-            ThreadStep.tilt(motor, int((position/100.0 * steps[motor]) / 8) * 8)
-            return 'tilting' + str(int((position/100.0 * steps[motor]) / 8) * 8)
+        ThreadStep.tilt(motor, int((position/100.0 * steps[motor]) / 8) * 8)
+        return 'tilting' + str(int((position/100.0 * steps[motor]) / 8) * 8)
     else:
         return 'INVALID'
