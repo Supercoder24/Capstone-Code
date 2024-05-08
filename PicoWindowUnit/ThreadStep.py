@@ -250,7 +250,10 @@ def _stepperThread():
         }
         for motor in (MOTOR0, MOTOR1):
             if jobs[motor]['id'] != doing[motor]['id']:
-                doing[motor]['target'] = jobs[motor]['target']
+                # if jobs[motor]['operation'] == 'cal': 
+                #    doing[motor]['target'] += jobs[motor]['target']
+                # else:
+                #    doing[motor]['target'] = jobs[motor]['target']
                 if jobs[motor]['operation'] == 'tilt':
                     if jobs[motor]['target'] > status[motor]['position']:
                         doing[motor]['operation'] = 'closing'
@@ -261,6 +264,9 @@ def _stepperThread():
                     else:
                         doing[motor]['operation'] = 'standby'
                         status[motor]['operation'] = 'standby'
+                # elif jobs[motor]['operation'] == 'cal':
+                        # doing[motor]['operation'] = 'calibrating'
+                        # status[motor]['operation'] = 'calibrating'
                 else:
                     status[motor]['operation'] = jobs[motor]['operation']
                     doing[motor]['operation'] = jobs[motor]['operation']
@@ -296,6 +302,25 @@ def _stepperThread():
                         status[motor]['running'] = False
                         doing[motor]['operation'] = 'standby'
                         status[motor]['operation'] = 'standby'
+                # elif op == 'calibrating':
+                #    if abs(status[motor]['position'] - doing[motor]['target']) < 8:
+                #        status[motor]['running'] = False
+                #        doing[motor]['operation'] = 'standby'
+                #        status[motor]['operation'] = 'standby'
+                #    elif status[motor]['position'] > doing[motor]['target']:
+                #        status[motor]['running'] = True
+                #        run[motor] = -1 * dirs[motor]
+                        # new_position = status[motor]['position'] - 8
+                        # if new_position < 0:
+                        #     new_position = 0
+                        # status[motor]['position'] = new_position
+                #    elif status[motor]['position'] < doing[motor]['target']:
+                        # status[motor]['running'] = True
+                        # run[motor] = 1 * dirs[motor]
+                        # new_position = status[motor]['position'] + 8
+                        # if new_position > steps[motor]:
+                        #     new_position = steps[motor]
+                        # status[motor]['position'] = new_position
             else:
                 status[motor]['running'] = False
                 status[motor]['operation'] = 'standby'
@@ -340,6 +365,20 @@ def tilt(motor, target, hs_dur=TILT_HS_DUR):
         jobs[motor]['tilt_hs_dur'] = hs_dur
         jobs[motor]['operation'] = 'tilt'
         jobs[motor]['target'] = target
+        if jobs[motor]['id'] >= 1023:
+            jobs[motor]['id'] = 0
+        else:
+            jobs[motor]['id'] += 1
+        jobs[motor]['run'] = True
+    else:
+        raise Exception("No motor specified!")
+    
+def cal(motor, steps):
+    if not status['threaded']:
+        _thread.start_new_thread(_stepperThread, ())
+    if motor == MOTOR0 or motor == MOTOR1:
+        jobs[motor]['operation'] = 'cal'
+        jobs[motor]['target'] = steps
         if jobs[motor]['id'] >= 1023:
             jobs[motor]['id'] = 0
         else:

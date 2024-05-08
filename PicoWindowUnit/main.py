@@ -2,8 +2,10 @@ from machine import Pin
 import utime
 import ThreadStep as ThreadStep
 
+id = 0 # Change to 1 for second unit
+
 def typ():
-    return 'wu' # Window Unit
+    return 'wu' + str(0) # Window Unit
 
 steps = {
     'm0': int(3 * 0.8 * 1024), # 4096 half steps per rev / 4 = 90 deg of steps
@@ -70,3 +72,6 @@ def pos(motor, position):
         return 'tilting' + str(int((position/100.0 * steps[motor]) / 8) * 8)
     else:
         return 'INVALID'
+    
+def cal(motor, dir, steps=100):
+    ThreadStep.cal(motor, int((dir * steps)))

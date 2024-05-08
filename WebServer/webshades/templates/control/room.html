@@ -16,6 +16,7 @@ Each template can extend a base template and override specific sections
       <h1>Room {{room['roomname']}}</h1>
       <h2>Manual</h2>
     </div>
+    <div id="new-room" onclick="changeTheme()">&#x26C3;</div>
     <!-- Extensions:
     foreach other room: <div class="tab"></div>
     <div id="new-room">+</div>
@@ -73,9 +74,9 @@ Each template can extend a base template and override specific sections
     </div> -->
   </div>
   <div id="master-controls">
-    <button onclick="tiltOpen()">Tilt Open</button>
-    <button onclick="closeAll()">Close All</button>
-    <button onclick="raiseAll()">Raise All</button>
+    <button onclick="closeDown()">Close Down</button>
+    <button onclick="openAll()">Open All</button>
+    <button onclick="closeUp()">Close Up</button>
   </div>
   <div id="notice">
     Hold shift to stop
