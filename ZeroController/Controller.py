@@ -43,6 +43,7 @@ class Pi:
             try:
                 talker = Talker(self.port)
                 talker.send('led = Pin(25, Pin.OUT);s = led.value')
+                talker.send('cal("m0",-1,steps=3000);cal("m1",-1,steps=3000)')
                 # print(talker.receive())
                 talker.close()
                 break

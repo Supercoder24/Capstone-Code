@@ -5,7 +5,7 @@ import ThreadStep as ThreadStep
 id = 0 # Change to 1 for second unit
 
 def typ():
-    return 'wu' + str(0) # Window Unit
+    return 'wu' + str(id) # Window Unit
 
 steps = {
     'm0': int(3 * 0.8 * 1024), # 4096 half steps per rev / 4 = 90 deg of steps
@@ -67,11 +67,15 @@ def pos(motor, position):
     if position == -1:
         ThreadStep.stop(motor)
         return 'stopped'
-    elif position >= 0 and position <= 100:
+    elif position == 0:
+        current_pos = ThreadStep.status[motor]['position']/steps[motor] * 100
+        if current_pos > 0:
+            ThreadStep.cal(motor, -1 * (500 + ThreadStep.status[motor]['position']))
+    elif position > 0 and position <= 100:
         ThreadStep.tilt(motor, int((position/100.0 * steps[motor]) / 8) * 8)
         return 'tilting' + str(int((position/100.0 * steps[motor]) / 8) * 8)
     else:
         return 'INVALID'
     
-def cal(motor, dir, steps=100):
+def cal(motor, dir, steps=1000):
     ThreadStep.cal(motor, int((dir * steps)))

@@ -250,10 +250,11 @@ def _stepperThread():
         }
         for motor in (MOTOR0, MOTOR1):
             if jobs[motor]['id'] != doing[motor]['id']:
-                # if jobs[motor]['operation'] == 'cal': 
-                #    doing[motor]['target'] += jobs[motor]['target']
-                # else:
-                #    doing[motor]['target'] = jobs[motor]['target']
+                if jobs[motor]['operation'] == 'cal': 
+                   doing[motor]['target'] += jobs[motor]['target']
+
+                else:
+                   doing[motor]['target'] = jobs[motor]['target']
                 if jobs[motor]['operation'] == 'tilt':
                     if jobs[motor]['target'] > status[motor]['position']:
                         doing[motor]['operation'] = 'closing'
@@ -264,9 +265,9 @@ def _stepperThread():
                     else:
                         doing[motor]['operation'] = 'standby'
                         status[motor]['operation'] = 'standby'
-                # elif jobs[motor]['operation'] == 'cal':
-                        # doing[motor]['operation'] = 'calibrating'
-                        # status[motor]['operation'] = 'calibrating'
+                elif jobs[motor]['operation'] == 'cal':
+                        doing[motor]['operation'] = 'calibrating'
+                        status[motor]['operation'] = 'calibrating'
                 else:
                     status[motor]['operation'] = jobs[motor]['operation']
                     doing[motor]['operation'] = jobs[motor]['operation']
@@ -302,25 +303,29 @@ def _stepperThread():
                         status[motor]['running'] = False
                         doing[motor]['operation'] = 'standby'
                         status[motor]['operation'] = 'standby'
-                # elif op == 'calibrating':
-                #    if abs(status[motor]['position'] - doing[motor]['target']) < 8:
-                #        status[motor]['running'] = False
-                #        doing[motor]['operation'] = 'standby'
-                #        status[motor]['operation'] = 'standby'
-                #    elif status[motor]['position'] > doing[motor]['target']:
-                #        status[motor]['running'] = True
-                #        run[motor] = -1 * dirs[motor]
-                        # new_position = status[motor]['position'] - 8
-                        # if new_position < 0:
-                        #     new_position = 0
-                        # status[motor]['position'] = new_position
-                #    elif status[motor]['position'] < doing[motor]['target']:
-                        # status[motor]['running'] = True
-                        # run[motor] = 1 * dirs[motor]
-                        # new_position = status[motor]['position'] + 8
-                        # if new_position > steps[motor]:
-                        #     new_position = steps[motor]
-                        # status[motor]['position'] = new_position
+                elif op == 'calibrating':
+                    if abs(status[motor]['position'] - doing[motor]['target']) < 8:
+                        status[motor]['running'] = False
+                        doing[motor]['operation'] = 'standby'
+                        status[motor]['operation'] = 'standby'
+                        new_position = status[motor]['position']
+                        if new_position < 0:
+                            new_position = 0
+                            doing[motor]['target'] = 0
+                        elif new_position > steps[motor]:
+                            new_position = steps[motor]
+                            doing[motor]['target'] = steps[motor]
+                        status[motor]['position'] = new_position
+                    elif status[motor]['position'] > doing[motor]['target']:
+                        status[motor]['running'] = True
+                        run[motor] = -1 * dirs[motor]
+                        new_position = status[motor]['position'] - 8
+                        status[motor]['position'] = new_position
+                    elif status[motor]['position'] < doing[motor]['target']:
+                        status[motor]['running'] = True
+                        run[motor] = 1 * dirs[motor]
+                        new_position = status[motor]['position'] + 8
+                        status[motor]['position'] = new_position
             else:
                 status[motor]['running'] = False
                 status[motor]['operation'] = 'standby'
@@ -377,6 +382,7 @@ def cal(motor, steps):
     if not status['threaded']:
         _thread.start_new_thread(_stepperThread, ())
     if motor == MOTOR0 or motor == MOTOR1:
+        # print(steps)
         jobs[motor]['operation'] = 'cal'
         jobs[motor]['target'] = steps
         if jobs[motor]['id'] >= 1023:
